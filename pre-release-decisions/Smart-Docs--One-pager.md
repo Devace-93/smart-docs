@@ -1,4 +1,4 @@
-# Smart Docs — the project on one page
+# Smart Docs: the project on one page
 
 Smart Docs (SD) is an open-source knowledge base where people and AI agents are equal users. A person writes Markdown pages in a tree of projects and folders; an agent does the same through an API and an MCP server. Any page can be made public, and every public page is served for humans (HTML), for tools (raw Markdown) and for models (`llms.txt` per project).
 
@@ -6,7 +6,7 @@ Started 2026-09-29. Owner: Enrique. Status: planning, no code yet.
 
 ## Why it exists
 
-1. **Prove, from the repo alone, that agents are first-class users.** An API an agent can drive, an MCP server, an eval suite, and docs written for machines — all verifiable by cloning the repo.
+1. **Prove, from the repo alone, that agents are first-class users.** An API an agent can drive, an MCP server, an eval suite, and docs written for machines, all verifiable by cloning the repo.
 2. **Be Enrique's own publishing tool** for 3m4.net (`/blog`, `/projects`), and anyone else's: clone, run, self-host, with nothing owed beyond a copyright line.
 
 ## Who uses it
@@ -18,7 +18,7 @@ Started 2026-09-29. Owner: Enrique. Status: planning, no code yet.
 | Agent         | MCP server (stdio or HTTP), REST API with an API key | Create, update, move, publish, search pages |
 | Public reader | Three read-only routes, no auth                      | Read HTML or Markdown, fetch`llms.txt`      |
 
-## Requirements — the whole project
+## Requirements: the whole project
 
 Everything SD is meant to do by the end, regardless of phase.
 
@@ -54,7 +54,7 @@ Everything SD is meant to do by the end, regardless of phase.
 
 ## Phases
 
-**Phase 1 — MVP backend (ship as soon as possible)**
+**Phase 1: MVP backend (ship as soon as possible)**
 Everything an agent or a Markdown-editor user needs, with the public HTML render as the only UI.
 
 
@@ -70,10 +70,10 @@ Everything an agent or a Markdown-editor user needs, with the public HTML render
 | EP-11 Sharing and permissions | Share by link, per-person access                                    |
 | EP-13 File uploads            | Images and attachments on pages                                     |
 
-**Phase 2 — Visual editor**
+**Phase 2: Visual editor**
 EP-08: a web editor on top of the API. Its tickets are planned with the backend and start once the backend tickets they depend on are done.
 
-**Phase 3 — Future**
+**Phase 3: Future**
 EP-09 real-time collaboration, EP-10 versions and history, EP-12 comments, EP-14 billing and custom domains. Each gets its own decision record when it comes up.
 
 ## Architecture in one sentence
@@ -103,5 +103,5 @@ One decision per cycle, one numbered record per decision (SD-001 onward), never 
 ## Where things live
 
 - Decisions: this folder (`pre-release-decisions/`), mirrored from the live decision log until launch.
-- Work tracking: ClickUp space "Smart Docs" — one list per epic; a ticket exists only for agreed work.
+- Work tracking: ClickUp space "Smart Docs", one list per epic; a ticket exists only for agreed work.
 - Code: this repository.
