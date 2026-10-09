@@ -57,12 +57,6 @@ These rules apply to every AI agent that reads, writes or reviews anything in th
 - Statuses are Proposed, Agreed, Edited and Rejected. Only Enrique sets a status.
 - Never delete or rewrite an existing record. A change of mind is a new record that references the old one.
 
-## Plans
-
-- Write every plan as a Markdown or HTML file under `.claude/plans/`, named `YYYY-MM-DD-<slug>.md`, so Enrique can open and edit it.
-- Plans are temporary. Never commit them and never publish them as artifacts or pages.
-- Delete the plan file once it is approved and the work is done.
-
 ## When unsure
 
 Stop and ask Enrique in the pull request or the ticket. Do not guess scope, do not pick between two readings on your own, and do not fill a gap with an assumption that changes the work.
