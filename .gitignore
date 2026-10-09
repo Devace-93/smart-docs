@@ -1,0 +1,22 @@
+# Harness state (see AGENTS.md, Harness rules)
+.claude/worktrees/
+.claude/plans/
+.claude/settings.local.json
+.cursor/
+
+# OS and editor
+.DS_Store
+*.swp
+
+# Secrets and local environment
+.env
+.env.*
+!.env.example
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
