@@ -24,7 +24,7 @@ One decision per cycle, one numbered record per decision (`SD-001` onward), neve
 ## How to propose a change
 
 1. Find the decision record and the ClickUp ticket the change implements. If there is none, propose a decision record first.
-2. Branch from `main`. Name the branch `<type>/<short-slug>`, where type is one of `feat`, `fix`, `docs`, `chore` or `decision`. Example: `docs/readme-and-agent-rules`.
+2. Branch from `main`. Name the branch `<type>/<ticket-id>-<short-slug>`, where type is one of `feat`, `fix`, `docs`, `chore` or `decision` and ticket id is the id of the related ClickUp ticket.
 3. Commit in small steps. The subject line is imperative, capitalised, without a type prefix, and under 72 characters. Example: `Add Smart Docs one-pager`. Add a body when the subject does not explain why.
 4. Run the automated review pass on your branch and fix or justify every finding (see Review conventions).
 5. Open a pull request against `main` using the body template below.

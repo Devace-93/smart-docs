@@ -43,7 +43,7 @@ These rules apply to every AI agent that reads, writes or reviews anything in th
 
 ## Git and pull requests
 
-- Branch from `main` as `<type>/<short-slug>`, with type `feat`, `fix`, `docs`, `chore` or `decision`.
+- Branch from `main` as `<type>/<ticket-id>-<short-slug>`, with type `feat`, `fix`, `docs`, `chore` or `decision`, and ticket id the id of the related ClickUp ticket.
 - Commit subjects are imperative, capitalised, without a type prefix, under 72 characters. Example: `Add Smart Docs one-pager`. Add a body when the subject does not explain why.
 - Never push to `main`. Never force push a branch once review has started.
 - Before asking for review, run your harness's automated review pass over the branch and fix every finding. If a finding stays, say why in the pull request.
