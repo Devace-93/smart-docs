@@ -28,9 +28,9 @@ One decision per cycle, one numbered record per decision (`SD-001` onward), neve
 3. Commit in small steps. The subject line is imperative, capitalised, without a type prefix, and under 72 characters. Example: `Add Smart Docs one-pager`. Add a body when the subject does not explain why.
 4. Run the automated review pass on your branch and fix or justify every finding (see Review conventions).
 5. Open a pull request against `main` using the body template below.
-6. After approval, the pull request is merged with a merge commit. Do not squash or rebase from the GitHub interface. Delete the branch after merge.
+6. After approval, the pull request is merged with a merge commit. Do not squash or rebase from the GitHub interface. GitHub deletes the branch after merge.
 
-Nobody pushes directly to `main`. Branch protection is the intended setting for `main`; until it is enabled, treat it as if it were.
+Nobody pushes directly to `main`. A GitHub ruleset on `main` enforces this. Every change arrives through a pull request. Merges use a merge commit. Every review thread is resolved before merging. Force pushes and branch deletion are blocked. Nobody can bypass the ruleset, not even the owner.
 
 ### Pull request body template
 
