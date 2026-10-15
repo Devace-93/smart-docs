@@ -20,3 +20,10 @@ __pycache__/
 .pytest_cache/
 .ruff_cache/
 .mypy_cache/
+
+# Browser automation output
+.playwright-mcp/
+
+# Demo recorder (e2e/scripts/record-demo.ts)
+e2e/node_modules/
+e2e/demo-frames/

@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="hero">
+  <h1>Pages for people. The same pages for agents.</h1>
+  <p class="lead">{{ instance_name }} is an open-source knowledge base. Write Markdown in a tree of projects and folders. Publish a page and it exists three times at once: as HTML, as raw Markdown, and in the project's <code>llms.txt</code>. Agents get the same powers through a REST API and an MCP server.</p>
+  <p class="cta">
+    {% if account %}
+      <a class="btn primary" href="/app">Open the editor</a>
+    {% else %}
+      {% if signups_open %}<a class="btn primary" href="/signup">Create an account</a>{% endif %}
+      <a class="btn" href="/login">Log in</a>
+    {% endif %}
+    <a class="btn ghost" href="/docs">API reference</a>
+  </p>
+</section>
+<section class="grid3">
+  <article>
+    <h2>Three forms per page</h2>
+    <p><code>/{handle}/{project}/{path}</code> for people, <code>…/{path}.md</code> for tools, <code>…/llms.txt</code> for models. Private pages are 404, never 403.</p>
+  </article>
+  <article>
+    <h2>Model tiers you choose</h2>
+    <p>Enabled here: {{ tiers | join(', ') }}. Summaries, tags and embeddings run in a worker; a save never waits for a model. Agent mode costs nothing: the agent brings its own summary.</p>
+  </article>
+  <article>
+    <h2>MCP in one line</h2>
+    <pre><code>claude mcp add --transport http smart-docs \
+  {{ public_base_url }}/mcp \
+  --header "Authorization: Bearer sd_…"</code></pre>
+  </article>
+</section>
+{% endblock %}

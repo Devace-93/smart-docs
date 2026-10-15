@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}{{ node.title }} · {{ project.name }}{% endblock %}
+{% block description %}{{ page.summary or node.title }}{% endblock %}
+{% block head %}
+  <link rel="canonical" href="{{ canonical }}">
+  <link rel="alternate" type="text/markdown" href="{{ canonical }}.md">
+{% endblock %}
+{% block main_class %}container public with-sidebar{% endblock %}
+{% block content %}
+<aside class="sidebar">
+  <p class="crumbs"><a href="{{ base_url }}">{{ project.name }}</a></p>
+  {% macro render(items) %}
+    <ul class="tree">
+    {% for n in items %}
+      <li class="{{ 'current' if n.path == node.path else '' }}">
+        <a href="{{ base_url }}/{{ n.path }}">{{ n.title }}</a>
+        {% if n.children %}{{ render(n.children) }}{% endif %}
+      </li>
+    {% endfor %}
+    </ul>
+  {% endmacro %}
+  {{ render(tree) }}
+</aside>
+<article class="doc">
+  <p class="crumbs"><a href="/{{ handle }}/{{ project.slug }}">{{ handle }} / {{ project.slug }}</a> / {{ node.path }}</p>
+  {% if not page.html.lstrip().startswith('<h1>') %}<h1>{{ node.title }}</h1>{% endif %}
+  <p class="meta">
+    {% if page.summary %}<span class="summary">{{ page.summary }}</span><br>{% endif %}
+    {% for t in page.tags %}<span class="tag">{{ t }}</span> {% endfor %}
+    <span class="muted">Updated {{ node.updated_at.strftime('%Y-%m-%d') }}</span> ·
+    <a href="{{ canonical }}.md">Markdown</a> ·
+    <a href="{{ base_url }}/llms.txt">llms.txt</a>
+  </p>
+  <div class="prose">{{ page.html | safe }}</div>
+</article>
+{% endblock %}

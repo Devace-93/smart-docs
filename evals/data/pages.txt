@@ -1,0 +1,8 @@
+# One repo-relative Markdown file per line. The runner reads these at run time so the eval never drifts from the docs.
+docs/decisions/sd-003.md
+docs/decisions/sd-004.md
+docs/decisions/sd-005.md
+docs/decisions/sd-006.md
+docs/decisions/sd-007.md
+docs/decisions/sd-008.md
+docs/for-agents.md

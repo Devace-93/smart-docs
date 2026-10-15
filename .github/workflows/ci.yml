@@ -1,0 +1,31 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      db:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: sd
+          POSTGRES_PASSWORD: sd
+          POSTGRES_DB: sd_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U sd -d sd_test" --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgresql+psycopg://sd:sd@localhost:5432/sd_test
+      LOCAL_ENABLED: "false"
+      SECRET_KEY: ci-secret
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+      - run: uv sync --all-groups
+      - run: uv run ruff check src tests evals
+      - run: uv run sd migrate
+      - run: uv run pytest -q

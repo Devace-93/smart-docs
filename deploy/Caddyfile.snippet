@@ -1,0 +1,6 @@
+# Add to /opt/3m4/deploy/Caddyfile.prod (the 3m4 Caddy owns ports 80/443 on this box).
+# The smart-docs compose project joins the external `edge` network, so the container name resolves.
+smart-docs.3m4.net {
+	encode gzip
+	reverse_proxy smart-docs-api-1:8000
+}
