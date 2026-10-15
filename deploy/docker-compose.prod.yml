@@ -1,0 +1,24 @@
+# Production overlay for the shared Hetzner box that already runs 3m4's Caddy.
+# Run from the repo root:
+#   docker compose -f docker-compose.yml -f deploy/docker-compose.prod.yml --profile local up -d --build
+# 3m4's Caddy routes smart-docs.3m4.net to `smart-docs-api-1:8000` over the shared `edge` network
+# (docker network create edge, once per box).
+services:
+  api:
+    ports: []
+    networks: [default, edge]
+  worker:
+    networks: [default]
+  db:
+    networks: [default]
+  ollama:
+    networks: [default]
+    deploy:
+      resources:
+        limits:
+          memory: 3g
+
+networks:
+  edge:
+    external: true
+    name: edge

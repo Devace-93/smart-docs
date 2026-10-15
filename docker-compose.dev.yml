@@ -1,0 +1,9 @@
+# Local development: publishes db and Ollama on the host so `uv run sd serve` can reach them.
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml --profile local up -d db ollama ollama-pull
+services:
+  db:
+    ports:
+      - "5433:5432"
+  ollama:
+    ports:
+      - "11434:11434"

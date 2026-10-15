@@ -1,0 +1,84 @@
+# One command brings up the whole thing:   docker compose --profile local up -d
+# Without --profile local there is no Ollama: set LOCAL_ENABLED=false (or point OLLAMA_URL elsewhere).
+name: smart-docs
+
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-sd}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-sd}
+      POSTGRES_DB: ${POSTGRES_DB:-sd}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-sd} -d ${POSTGRES_DB:-sd}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+
+  # Runs migrations and the job queue schema, then exits. api and worker wait for it.
+  migrate:
+    build: .
+    command: ["sd", "migrate"]
+    env_file: .env
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg://sd:sd@db:5432/sd}
+    depends_on:
+      db: { condition: service_healthy }
+    restart: "no"
+
+  api:
+    build: .
+    env_file: .env
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg://sd:sd@db:5432/sd}
+      OLLAMA_URL: ${OLLAMA_URL:-http://ollama:11434}
+    ports:
+      - "${SD_PORT:-8000}:8000"
+    depends_on:
+      db: { condition: service_healthy }
+      migrate: { condition: service_completed_successfully }
+    restart: unless-stopped
+
+  worker:
+    build: .
+    command: ["sd", "worker", "--concurrency", "1"]
+    env_file: .env
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg://sd:sd@db:5432/sd}
+      OLLAMA_URL: ${OLLAMA_URL:-http://ollama:11434}
+    depends_on:
+      db: { condition: service_healthy }
+      migrate: { condition: service_completed_successfully }
+    restart: unless-stopped
+
+  ollama:
+    image: ollama/ollama:latest
+    profiles: ["local"]
+    volumes:
+      - ollama:/root/.ollama
+    environment:
+      OLLAMA_KEEP_ALIVE: ${OLLAMA_KEEP_ALIVE:-30m}
+      OLLAMA_NUM_PARALLEL: "1"
+    restart: unless-stopped
+
+  # Pulls the two models once, then exits.
+  ollama-pull:
+    image: ollama/ollama:latest
+    profiles: ["local"]
+    depends_on: [ollama]
+    environment:
+      OLLAMA_HOST: http://ollama:11434
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        until ollama list >/dev/null 2>&1; do sleep 2; done
+        ollama pull ${LOCAL_MODEL:-qwen2.5:3b}
+        ollama pull ${EMBED_MODEL:-nomic-embed-text}
+    restart: "no"
+
+volumes:
+  pgdata:
+  ollama:
