@@ -2,7 +2,7 @@
 
 Smart Docs is an open-source knowledge base where people and AI agents are equal users. A person writes Markdown pages in a tree of projects and folders. An agent does the same through a REST API and an MCP (Model Context Protocol) server. Any page can be made public, and every public page is served as HTML for people, as raw Markdown for tools, and as `llms.txt` per project for models.
 
-Status: MVP running at [smart-docs.3m4.net](https://smart-docs.3m4.net). Owner: Enrique.
+Status: minimum viable product (MVP) running at [smart-docs.3m4.net](https://smart-docs.3m4.net). Owner: Enrique.
 
 The whole project on one page: [Smart Docs one-pager](pre-release-decisions/Smart-Docs--One-pager.md). How agents use it: [docs/for-agents.md](docs/for-agents.md). Why it is built this way: [docs/decisions/](docs/decisions/README.md).
 
@@ -66,10 +66,11 @@ uv run sd-evals --key sd_...    # search eval, writes evals/results/
 | `deploy/` | Production overlay, Caddy snippet, runbook, backup script |
 | `pre-release-decisions/` | The one-pager written before any code |
 | `AGENTS.md` | Rules for AI agents working in this repo. People follow them too |
+| `CLAUDE.md` | One line that points Claude Code at `AGENTS.md` |
 
 ## Evals
 
-`uv run sd-evals` seeds the pages in `evals/data/pages/`, waits for embeddings and runs the search queries in `evals/data/search_queries.json`. Results land in `evals/results/<date>-<provider>.json`. Failures go to [docs/evals-failures.md](docs/evals-failures.md). Summary and tag evals (SD-010) are not automated yet.
+`uv run sd-evals` seeds the docs listed in `evals/data/pages.txt`, waits for embeddings and runs the search queries in `evals/data/search_queries.json`. Results land in `evals/results/<timestamp>-<tier>.json`. Failures go to [docs/evals-failures.md](docs/evals-failures.md). Summary and tag evals (SD-010) are not automated yet.
 
 ## How decisions are made
 

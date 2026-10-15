@@ -64,6 +64,7 @@ def node_out(n: Node, handle: str, project_slug: str, *, with_body: bool = True)
             tags=list(n.page.tags),
             enrich_status=n.page.enrich_status,
             enrich_error=n.page.enrich_error,
+            embedded=n.page.embedding is not None,
         )
         if with_body:
             d.update(markdown=n.page.markdown, html=n.page.html)

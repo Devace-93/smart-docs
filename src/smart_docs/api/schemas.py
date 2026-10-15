@@ -130,6 +130,7 @@ class NodeOut(BaseModel):
     tags: list[str] | None = None
     enrich_status: str | None = None
     enrich_error: str | None = None
+    embedded: bool | None = Field(default=None, description="True once the worker stored the embedding, so search can find the page.")
 
 
 class TreeNode(BaseModel):
