@@ -97,12 +97,12 @@ def cmd_seed(args) -> None:
     from smart_docs.services import tree as tree_svc
     from smart_docs.services.accounts import get_account_by_handle
     from smart_docs.services.render import first_heading
-    from smart_docs.worker.app import enqueue_enrich
+    from smart_docs.worker.app import app, enqueue_enrich
 
     folder = Path(args.folder)
 
     async def run():
-        async with session_factory()() as session:
+        async with app.open_async(), session_factory()() as session:
             account = await get_account_by_handle(session, args.handle)
             if account is None:
                 sys.exit(f"no account with handle {args.handle}")

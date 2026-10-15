@@ -43,7 +43,10 @@ def upgrade() -> None:
         sa.Column("description", sa.Text, nullable=False, server_default=""),
         sa.Column("created_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()),
         sa.Column("deleted_at", sa.DateTime(timezone=True)),
-        sa.UniqueConstraint("account_id", "slug", name="uq_projects_account_slug"),
+    )
+    op.create_index(
+        "uq_projects_account_slug_live", "projects", ["account_id", "slug"], unique=True,
+        postgresql_where=sa.text("deleted_at IS NULL"),
     )
 
     op.create_table(
