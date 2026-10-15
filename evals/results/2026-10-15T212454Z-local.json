@@ -1,0 +1,32 @@
+{
+  "eval": "search",
+  "provider": "local",
+  "date": "2026-10-15T21:24:54.448652+00:00",
+  "pages": 7,
+  "n": 15,
+  "hit@1": 0.8,
+  "hit@3": 0.867,
+  "mrr": 0.833,
+  "p50_latency_s": 0.054,
+  "failures": [
+    {
+      "query": "what does agent mode mean for summaries and tags",
+      "expected": "sd-005",
+      "got": [
+        "for-agents",
+        "sd-007",
+        "sd-006"
+      ]
+    },
+    {
+      "query": "what does a 429 response contain",
+      "expected": "for-agents",
+      "got": [
+        "sd-007",
+        "sd-008",
+        "sd-006"
+      ]
+    }
+  ],
+  "passes": false
+}

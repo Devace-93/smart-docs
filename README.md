@@ -70,7 +70,13 @@ uv run sd-evals --key sd_...    # search eval, writes evals/results/
 
 ## Evals
 
-`uv run sd-evals` seeds the docs listed in `evals/data/pages.txt`, waits for embeddings and runs the search queries in `evals/data/search_queries.json`. Results land in `evals/results/<timestamp>-<tier>.json`. Failures go to [docs/evals-failures.md](docs/evals-failures.md). Summary and tag evals (SD-010) are not automated yet.
+`uv run sd-evals` seeds the docs listed in `evals/data/pages.txt`, waits for embeddings and runs the search queries in `evals/data/search_queries.json`. Results land in `evals/results/<timestamp>-<tier>.json`.
+
+| Date | Eval | Tier | Pages | Queries | hit@1 | hit@3 | MRR | p50 latency |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 2026-10-15 | search | local (nomic-embed-text) | 7 | 15 | 0.80 | 0.87 | 0.83 | 54 ms |
+
+The bar from SD-010 is hit@3 at or above 0.9; the two misses are in [docs/evals-failures.md](docs/evals-failures.md). Failures go to [docs/evals-failures.md](docs/evals-failures.md). Summary and tag evals (SD-010) are not automated yet.
 
 ## How decisions are made
 
