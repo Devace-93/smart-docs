@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{{ instance_name }}{% endblock %}</title>
+  <meta name="description" content="{% block description %}Open-source knowledge base where people and AI agents are equal users.{% endblock %}">
+  {% block head %}{% endblock %}
+  <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+  <meta property="og:title" content="{{ self.title() }}">
+  <meta property="og:image" content="{{ public_base_url }}/og-image.png">
+  <link rel="stylesheet" href="/static/app.css">
+</head>
+<body class="{% block body_class %}{% endblock %}">
+  <header class="top">
+    <a class="brand" href="/"><span class="logo">SD</span> {{ instance_name }}</a>
+    <nav>
+      {% block nav %}
+      <a href="/docs">API</a>
+      <a href="/app">Open the editor</a>
+      {% endblock %}
+      <button class="theme-toggle" type="button" aria-label="Toggle theme" data-theme-toggle>◐</button>
+    </nav>
+  </header>
+  <main class="{% block main_class %}container{% endblock %}">
+    {% block content %}{% endblock %}
+  </main>
+  <footer class="site-footer">
+    <span>Enrique Magallón</span>
+    <span>·</span>
+    <a href="{{ footer_url }}">Source</a>
+    <span>·</span>
+    <a href="{{ info_url }}">More apps</a>
+    {% if footer_text %}<span>·</span><a href="{{ footer_url }}">{{ footer_text }}</a>{% endif %}
+  </footer>
+  <script src="/static/theme.js"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>
