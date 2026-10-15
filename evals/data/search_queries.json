@@ -1,0 +1,17 @@
+[
+  {"query": "which web framework and database does the project use", "expected": "sd-003"},
+  {"query": "why procrastinate instead of celery", "expected": "sd-003"},
+  {"query": "how are folders and pages stored in the tree", "expected": "sd-004"},
+  {"query": "materialized path and moving a subtree", "expected": "sd-004"},
+  {"query": "how many hosted requests per day does an account get", "expected": "sd-005"},
+  {"query": "what does agent mode mean for summaries and tags", "expected": "sd-005"},
+  {"query": "what URL serves the raw markdown of a public page", "expected": "sd-006"},
+  {"query": "llms.txt generation rules", "expected": "sd-006"},
+  {"query": "what tools does the MCP server expose", "expected": "sd-007"},
+  {"query": "content_edit_mode append or prepend", "expected": "sd-007"},
+  {"query": "how are passwords hashed and sessions issued", "expected": "sd-008"},
+  {"query": "what is never stored", "expected": "sd-008"},
+  {"query": "how do I connect Claude Code to a Smart Docs instance", "expected": "for-agents"},
+  {"query": "what does a 429 response contain", "expected": "for-agents"},
+  {"query": "private pages return 404", "expected": "sd-006"}
+]
