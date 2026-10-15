@@ -33,12 +33,15 @@ async def enrich_page(node_id: str) -> None:
     await enrich(uuid.UUID(node_id))
 
 
-async def enqueue_enrich(node_id: uuid.UUID) -> None:
+async def enqueue_enrich(node_id: uuid.UUID, *, delay_seconds: int | None = None) -> None:
     """Defer the job. The queueing lock collapses repeated saves of one page into one job."""
+    job = enrich_page.configure(
+        lock=str(node_id),
+        queueing_lock=f"enrich-{node_id}",
+        schedule_in={"seconds": delay_seconds} if delay_seconds else None,
+    )
     try:
-        await enrich_page.configure(lock=str(node_id), queueing_lock=f"enrich-{node_id}").defer_async(
-            node_id=str(node_id)
-        )
+        await job.defer_async(node_id=str(node_id))
     except procrastinate.exceptions.AlreadyEnqueued:
         pass
 

@@ -53,7 +53,6 @@ def build_mcp_asgi_app():
         transport_security=TransportSecuritySettings(enable_dns_rebinding_protection=False),
     )
 
-
     @asynccontextmanager
     async def lifespan():
         async with inner.router.lifespan_context(inner):

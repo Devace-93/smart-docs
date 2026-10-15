@@ -13,8 +13,19 @@ from smart_docs.models import Account, Node, Project
 from smart_docs.services.render import plain_excerpt
 from smart_docs.services.tree import _clean_tags
 from smart_docs.services.usage import reserve_model_call
+from smart_docs.worker.app import enqueue_enrich
 
 log = logging.getLogger("smart_docs.worker")
+
+
+def usable_summary(summary: str, title: str) -> bool:
+    """Small models sometimes echo the title or a label instead of a sentence."""
+    s = summary.strip().strip('"')
+    if len(s.split()) < 4:
+        return False
+    if s.lower().startswith(("title:", "summary:")):
+        return False
+    return s.lower().rstrip(".") != title.strip().lower()
 
 
 async def enrich(node_id: uuid.UUID) -> None:
@@ -39,15 +50,20 @@ async def enrich(node_id: uuid.UUID) -> None:
                 try:
                     await reserve_model_call(session, account, provider.tier)
                     summary, tags = await summarize(provider, node.title, page.markdown)
+                    if not usable_summary(summary, node.title):
+                        summary = ""
                     page.summary = summary or plain_excerpt(page.markdown, 160)
                     page.tags = _clean_tags(tags)
                     page.enrich_status = "done"
                     page.enriched_by = f"{provider.tier}:{provider.model}"
                     page.enrich_error = None
                 except RateLimited as e:
-                    page.enrich_status = "rate_limited"
+                    # Over the tier's cap: keep the page pending and try again when the window opens.
+                    page.enrich_status = "pending"
                     page.enrich_error = e.message
-                    page.summary = page.summary or plain_excerpt(page.markdown, 160)
+                    await session.commit()
+                    await enqueue_enrich(node.id, delay_seconds=max(5, min(e.retry_after, 3600)))
+                    return
                 except Exception as e:  # noqa: BLE001
                     log.warning("summary failed for %s: %s", node.path, e)
                     page.enrich_status = "failed"

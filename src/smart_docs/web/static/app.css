@@ -42,7 +42,7 @@ label { display: block; font-size: 0.9em; color: var(--fg2); margin: 10px 0 4px;
 .grid3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
 .grid3 article { background: var(--bg2); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; }
 .grid3 h2 { font-size: 1.05em; margin: 0 0 8px; }
-.grid3 pre { font-size: 0.8em; }
+.grid3 pre { font-size: 0.8em; white-space: pre-wrap; word-break: break-all; }
 
 /* public pages */
 .public.with-sidebar { display: grid; grid-template-columns: 240px 1fr; gap: 28px; max-width: 1100px; }

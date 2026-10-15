@@ -5,7 +5,7 @@
   var BASE = root.dataset.base || '';
   var TIERS = (root.dataset.tiers || '').split(',').filter(Boolean);
   var TOKEN_KEY = 'sd.token';
-  var S = { token: null, me: null, projects: [], project: null, tree: [], node: null, dirty: false, collapsed: {}, view: 'editor', preview: false, search: null };
+  var S = { newKey: null, token: null, me: null, projects: [], project: null, tree: [], node: null, dirty: false, collapsed: {}, view: 'editor', preview: false, search: null };
 
   try { S.token = localStorage.getItem(TOKEN_KEY); } catch (e) {}
 
@@ -240,12 +240,16 @@
   async function keysView() {
     var keys = await api('GET', '/me/keys');
     var shown = h('div');
+    if (S.newKey) {
+      var k = S.newKey; S.newKey = null;  // shown once, on the render right after creation
+      shown.appendChild(h('div', { class: 'card' }, [h('p', null, ['Copy this key now. It is shown once.']), h('div', { class: 'keyshow' }, [k.key]), h('p', { class: 'muted' }, ['Claude Code: ', h('code', null, ['claude mcp add --transport http smart-docs ' + BASE + '/mcp --header "Authorization: Bearer ' + k.key + '"'])])]));
+    }
     var name = h('input', { type: 'text', placeholder: 'key name (e.g. claude-code)', value: 'claude-code' });
     var scopes = ['read', 'write', 'publish'].map(function (s) { var c = h('input', { type: 'checkbox', value: s }); c.checked = true; return h('label', { style: 'display:inline-flex;gap:4px;margin-right:12px' }, [c, s]); });
     var form = h('form', { onsubmit: async function (e) {
       e.preventDefault();
       var sc = scopes.map(function (l) { return l.firstChild; }).filter(function (c) { return c.checked; }).map(function (c) { return c.value; });
-      try { var k = await api('POST', '/me/keys', { name: name.value, scopes: sc }); shown.innerHTML = ''; shown.appendChild(h('div', { class: 'card' }, [h('p', null, ['Copy this key now. It is shown once.']), h('div', { class: 'keyshow' }, [k.key]), h('p', { class: 'muted' }, ['Claude Code: ', h('code', null, ['claude mcp add --transport http smart-docs ' + BASE + '/mcp --header "Authorization: Bearer ' + k.key + '"'])])])); render(); } catch (ex) { toast(ex.message, true); }
+      try { S.newKey = await api('POST', '/me/keys', { name: name.value, scopes: sc }); render(); } catch (ex) { toast(ex.message, true); }
     } }, [h('div', { class: 'bar' }, [name, h('span', null, scopes), h('button', { class: 'primary', type: 'submit' }, ['Create key'])])]);
     var rows = keys.map(function (k) { return h('tr', null, [h('td', null, [k.name]), h('td', null, [h('code', null, [k.prefix + '…'])]), h('td', null, [k.scopes.join(', ')]), h('td', null, [fmtDate(k.created_at)]), h('td', null, [k.last_used_at ? fmtDate(k.last_used_at) : 'never']), h('td', null, [h('button', { class: 'mini danger', onclick: async function () { if (!confirm('Revoke this key?')) return; await api('DELETE', '/me/keys/' + k.id); render(); } }, ['revoke'])])]); });
     return h('div', null, [h('h2', null, ['API keys']), h('p', { class: 'muted' }, ['Agents authenticate with ', h('code', null, ['Authorization: Bearer sd_…']), ' on the REST API and on the MCP endpoint ', h('code', null, [BASE + '/mcp']), '.']), form, shown, keys.length ? h('table', { class: 'list' }, [h('thead', null, [h('tr', null, [h('th', null, ['Name']), h('th', null, ['Prefix']), h('th', null, ['Scopes']), h('th', null, ['Created']), h('th', null, ['Last used']), h('th')])]), h('tbody', null, rows)]) : h('p', { class: 'muted' }, ['No keys yet.'])]);

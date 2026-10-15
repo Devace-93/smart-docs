@@ -13,6 +13,7 @@ from typing import Any
 from mcp.server.mcpserver import MCPServer
 
 from smart_docs.api.deps import Principal, resolve_principal
+from smart_docs.api.routes import has_body
 from smart_docs.api.serializers import node_out, project_base_url, project_out
 from smart_docs.db import session_factory
 from smart_docs.errors import SDError, Unauthorized
@@ -173,10 +174,9 @@ async def create_page(
             is_public=public,
         )
         await session.commit()
-        if node.kind == "page":
+        if node.kind == "page" and has_body(markdown):
             await enqueue_enrich(node.id)
-        d = node_out(node, p.account.handle, proj.slug, with_body=False)
-        return d
+        return node_out(node, p.account.handle, proj.slug, with_body=False)
 
     return await _call(run)
 
@@ -216,7 +216,7 @@ async def update_page(
             content_edit_mode=content_edit_mode,
         )
         await session.commit()
-        if markdown is not None and node.kind == "page":
+        if markdown is not None and node.kind == "page" and has_body(node.page.markdown if node.page else ""):
             await enqueue_enrich(node.id)
         return node_out(node, p.account.handle, proj.slug, with_body=False)
 

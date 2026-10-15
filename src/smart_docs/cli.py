@@ -163,7 +163,10 @@ def cmd_enrich_pending(_args) -> None:
             rows = await session.scalars(
                 select(Page.node_id)
                 .join(Node, Node.id == Page.node_id)
-                .where(Node.deleted_at.is_(None), (Page.enrich_status.in_(["pending", "failed", "rate_limited"])) | Page.embedding.is_(None))
+                .where(
+                    Node.deleted_at.is_(None),
+                    (Page.enrich_status.in_(["pending", "failed", "rate_limited"])) | Page.embedding.is_(None),
+                )
             )
             ids = list(rows)
             for node_id in ids:
@@ -178,7 +181,9 @@ def main() -> None:
     sub = parser.add_subparsers(dest="cmd", required=True)
 
     sub.add_parser("migrate", help="apply database migrations and the job queue schema").set_defaults(fn=cmd_migrate)
-    sub.add_parser("enrich-pending", help="queue enrichment for pages missing metadata or embeddings").set_defaults(fn=cmd_enrich_pending)
+    sub.add_parser("enrich-pending", help="queue enrichment for pages missing metadata or embeddings").set_defaults(
+        fn=cmd_enrich_pending
+    )
 
     p = sub.add_parser("create-user", help="create an account")
     p.add_argument("email")

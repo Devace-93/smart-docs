@@ -22,6 +22,13 @@ from smart_docs.worker.app import enqueue_enrich
 
 router = APIRouter(prefix="/api/v1")
 
+
+def has_body(markdown: str) -> bool:
+    """A page with only a heading is not worth a model call; the first real save queues it."""
+    lines = [ln.strip() for ln in (markdown or "").splitlines() if ln.strip()]
+    return any(not ln.startswith("#") for ln in lines)
+
+
 ERR = {401: {"model": schemas.ErrorOut}, 404: {"model": schemas.ErrorOut}, 409: {"model": schemas.ErrorOut}}
 
 
@@ -222,7 +229,7 @@ async def create_node(
         is_public=body.public,
     )
     await session.commit()
-    if node.kind == "page":
+    if node.kind == "page" and has_body(body.markdown):
         await enqueue_enrich(node.id)
     return node_out(node, p.account.handle, project.slug)
 
@@ -262,7 +269,7 @@ async def patch_node(
         content_edit_mode=body.content_edit_mode,
     )
     await session.commit()
-    if node.kind == "page" and body.markdown is not None:
+    if node.kind == "page" and body.markdown is not None and has_body(node.page.markdown if node.page else ""):
         await enqueue_enrich(node.id)
     return node_out(node, p.account.handle, project.slug)
 

@@ -23,6 +23,7 @@ from smart_docs.worker.app import app as queue_app
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
 
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Open the job queue connection and the MCP session manager for the life of the process."""
