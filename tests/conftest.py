@@ -14,9 +14,28 @@ from httpx import ASGITransport, AsyncClient
 os.environ.setdefault("LOCAL_ENABLED", "false")
 os.environ.setdefault("SECRET_KEY", "test-secret")
 os.environ.setdefault("PUBLIC_BASE_URL", "http://testserver")
+# Without DATABASE_URL the tests use the db container from docker-compose.dev.yml (port 5433) and their own database.
+os.environ.setdefault("DATABASE_URL", "postgresql+psycopg://sd:sd@localhost:5433/sd_test")
 
+from smart_docs.config import get_settings  # noqa: E402
 from smart_docs.db import dispose_engine  # noqa: E402
 from smart_docs.main import create_app  # noqa: E402
+
+
+@pytest.fixture(scope="session", autouse=True)
+def database():
+    """Create the test database if it is missing, then apply migrations (a no-op when already current)."""
+    import psycopg
+    from psycopg import sql
+
+    from smart_docs.cli import cmd_migrate
+
+    url = psycopg.conninfo.conninfo_to_dict(get_settings().sync_database_url)
+    name = url.pop("dbname")
+    with psycopg.connect(**url, dbname="postgres", autocommit=True) as conn:
+        if conn.execute("SELECT 1 FROM pg_database WHERE datname = %s", (name,)).fetchone() is None:
+            conn.execute(sql.SQL("CREATE DATABASE {}").format(sql.Identifier(name)))
+    cmd_migrate(None)
 
 
 @pytest.fixture

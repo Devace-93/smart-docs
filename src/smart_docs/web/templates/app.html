@@ -2,9 +2,8 @@
 {% block title %}{{ instance_name }} · editor{% endblock %}
 {% block body_class %}app-body{% endblock %}
 {% block main_class %}app-main{% endblock %}
-{% block nav %}
-  <a href="/docs">API</a>
-  <span id="nav-user"></span>
+{% block nav_actions %}
+  <span class="nav-user"></span>
 {% endblock %}
 {% block content %}
 <div id="app" data-tiers="{{ tiers | join(',') }}" data-base="{{ public_base_url }}">

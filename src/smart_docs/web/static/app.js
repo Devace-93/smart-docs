@@ -26,7 +26,7 @@
     document.body.appendChild(t);
     setTimeout(function () { t.remove(); }, bad ? 5000 : 2500);
   }
-  function setToken(t) { S.token = t; try { t ? localStorage.setItem(TOKEN_KEY, t) : localStorage.removeItem(TOKEN_KEY); } catch (e) {} document.cookie = 'sd_session=' + (t || '') + '; path=/; max-age=' + (t ? 86400 : 0) + '; SameSite=Lax'; }
+  function setToken(t) { S.token = t; try { t ? localStorage.setItem(TOKEN_KEY, t) : localStorage.removeItem(TOKEN_KEY); } catch (e) {} document.documentElement.classList.toggle('authed', !!t); document.cookie ='sd_session=' + (t || '') + '; path=/; max-age=' + (t ? 86400 : 0) + '; SameSite=Lax'; }
   async function api(method, path, body) {
     var opts = { method: method, headers: {} };
     if (S.token) opts.headers['Authorization'] = 'Bearer ' + S.token;
@@ -297,7 +297,7 @@
       if (!S.me) S.me = await api('GET', '/me');
       if (!S.projects.length) await loadProjects();
     } catch (ex) { if (ex.status !== 401) toast(ex.message, true); return; }
-    var nav = document.getElementById('nav-user'); if (nav) nav.textContent = S.me.handle;
+    document.querySelectorAll('.nav-user').forEach(function (n) { n.textContent = S.me.handle; });
     if (parts[0] === 'login' || parts[0] === 'signup') { go('#/projects'); return; }
     var pane = h('section', { class: 'pane' });
     if (parts[0] === 'p' && parts[1]) {
