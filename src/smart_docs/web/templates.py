@@ -25,6 +25,8 @@ def _globals() -> dict:
         "signups_open": s.signups_open,
         "retro_project_key": s.retro_project_key,
         "retro_widget_url": s.retro_widget_url,
+        "metrics_project_key": s.metrics_project_key,
+        "metrics_tracker_url": s.metrics_tracker_url,
     }
 
 

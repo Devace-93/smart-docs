@@ -14,6 +14,10 @@
   {# retro feedback widget: bug reports, feedback and feature requests from users #}
   <script src="{{ retro_widget_url }}" data-project-key="{{ retro_project_key }}" defer></script>
   {% endif %}
+  {% if metrics_project_key %}
+  {# metrics web analytics: page views, visitors, referrers, devices (cookie-less) #}
+  <script src="{{ metrics_tracker_url }}" data-key="{{ metrics_project_key }}" defer></script>
+  {% endif %}
 </head>
 <body class="{% block body_class %}{% endblock %}">
   <header class="top">

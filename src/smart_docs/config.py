@@ -21,6 +21,9 @@ class Settings(BaseSettings):
     # retro feedback widget (https://retro.3m4.net): the project's PUBLIC key. Empty = no widget.
     retro_project_key: str = ""
     retro_widget_url: str = "https://retro.3m4.net/widget.js"
+    # metrics web analytics (https://metrics.3m4.net): the project's PUBLIC key. Empty = no tracker.
+    metrics_project_key: str = ""
+    metrics_tracker_url: str = "https://metrics.3m4.net/m.js"
 
     # Database
     database_url: str = "postgresql+psycopg://sd:sd@localhost:5432/sd"
