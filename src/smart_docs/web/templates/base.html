@@ -10,6 +10,10 @@
   <meta property="og:title" content="{{ self.title() }}">
   <meta property="og:image" content="{{ public_base_url }}/og-image.png">
   <link rel="stylesheet" href="/static/app.css">
+  {% if retro_project_key %}
+  {# retro feedback widget: bug reports, feedback and feature requests from users #}
+  <script src="{{ retro_widget_url }}" data-project-key="{{ retro_project_key }}" defer></script>
+  {% endif %}
 </head>
 <body class="{% block body_class %}{% endblock %}">
   <header class="top">
