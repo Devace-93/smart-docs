@@ -23,6 +23,8 @@ def _globals() -> dict:
         "info_url": s.info_url,
         "public_base_url": s.public_base_url.rstrip("/"),
         "signups_open": s.signups_open,
+        "retro_project_key": s.retro_project_key,
+        "retro_widget_url": s.retro_widget_url,
     }
 
 

@@ -18,6 +18,9 @@ class Settings(BaseSettings):
     footer_url: str = "https://github.com/Devace-93/smart-docs"
     info_url: str = "https://info.3m4.net"
     signups_open: bool = True
+    # retro feedback widget (https://retro.3m4.net): the project's PUBLIC key. Empty = no widget.
+    retro_project_key: str = ""
+    retro_widget_url: str = "https://retro.3m4.net/widget.js"
 
     # Database
     database_url: str = "postgresql+psycopg://sd:sd@localhost:5432/sd"
