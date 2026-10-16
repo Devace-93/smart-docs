@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import UTC, datetime
 from pathlib import Path
 
 from fastapi.templating import Jinja2Templates
@@ -20,6 +21,7 @@ def _globals() -> dict:
         "instance_name": s.instance_name,
         "footer_text": s.footer_text,
         "footer_url": s.footer_url,
+        "source_url": "https://github.com/Devace-93/smart-docs",
         "info_url": s.info_url,
         "public_base_url": s.public_base_url.rstrip("/"),
         "signups_open": s.signups_open,
@@ -27,6 +29,7 @@ def _globals() -> dict:
         "retro_widget_url": s.retro_widget_url,
         "metrics_project_key": s.metrics_project_key,
         "metrics_tracker_url": s.metrics_tracker_url,
+        "year": lambda: datetime.now(UTC).year,
     }
 
 
