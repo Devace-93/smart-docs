@@ -47,7 +47,7 @@ sed -i 's#@db:5432#@localhost:5433#; s#http://ollama:#http://localhost:#' .env
 uv run sd migrate
 uv run sd serve --reload        # http://localhost:8000
 uv run sd worker                # in a second terminal
-uv run pytest                   # tests hit the real Postgres
+uv run pytest                   # tests hit the db container above, in their own sd_test database
 uv run sd-evals --key sd_...    # search eval, writes evals/results/
 ```
 
