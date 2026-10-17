@@ -1,70 +1,70 @@
-"""Accounts, sessions and API keys."""
+"""Accounts and API keys. Identity (password, e-mail, handle, avatar) lives at accounts.3m4.net (SD-013)."""
 
 from __future__ import annotations
 
+import logging
 import uuid
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime
 
-from sqlalchemy import func, select
+from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from smart_docs import security
 from smart_docs.config import get_settings
-from smart_docs.errors import Forbidden, Invalid, NotFound, RateLimited, Unauthorized
-from smart_docs.models import Account, ApiKey, LoginAttempt
-from smart_docs.slug import is_valid_slug, slugify
+from smart_docs.errors import Forbidden, Invalid, NotFound
+from smart_docs.models import Account, ApiKey
+
+log = logging.getLogger("smart_docs.accounts")
 
 
-async def register(session: AsyncSession, *, email: str, password: str, handle: str | None) -> Account:
+def default_tier() -> str:
     s = get_settings()
-    if not s.signups_open:
-        raise Forbidden("Signups are closed on this instance.")
-    email = email.strip().lower()
-    if "@" not in email or len(email) > 320:
-        raise Invalid("Enter a valid email address.")
-    if len(password) < 8:
-        raise Invalid("Password must be at least 8 characters.")
-    handle = slugify(handle) if handle else slugify(email.split("@")[0])
-    if not is_valid_slug(handle) or handle in s.reserved_handles:
-        raise Invalid("That handle is reserved or invalid.")
-    existing = await session.scalar(select(Account).where((Account.email == email) | (Account.handle == handle)))
-    if existing is not None:
-        raise Invalid("Email or handle already taken.")
-    tier = s.default_tier if s.default_tier in s.tiers_available() else "agent"
-    account = Account(email=email, handle=handle, password_hash=security.hash_password(password), tier=tier)
-    session.add(account)
-    await session.flush()
+    return s.default_tier if s.default_tier in s.tiers_available() else "agent"
+
+
+async def provision(session: AsyncSession, claims: dict) -> Account:
+    """The account behind a verified session, created on first sight and kept in sync with the claims.
+
+    `email` and `handle` mirror accounts.3m4.net. The handle drives the public
+    URLs, so a rename there renames them here (the accounts profile page warns
+    about that). Creating is subject to `SIGNUPS_OPEN`; refreshing never is.
+    The row is committed right away so a later rollback in the request cannot
+    undo the provisioning.
+    """
+    identity_id = uuid.UUID(str(claims["sub"]))
+    email = str(claims.get("email") or "").strip().lower()
+    handle = str(claims.get("handle") or "").strip().lower()
+    if not email or not handle:
+        raise Invalid("The session is missing the e-mail or the handle.")
+
+    account = await session.scalar(select(Account).where(Account.identity_id == identity_id))
+    if account is None:
+        if not get_settings().signups_open:
+            raise Forbidden("Signups are closed on this instance.", hint="Ask the operator for an account.")
+        account = Account(identity_id=identity_id, email=email, handle=handle, tier=default_tier())
+        session.add(account)
+        try:
+            await session.commit()
+        except IntegrityError:
+            # Two first requests raced, or the handle/e-mail is still held by a stale mirror.
+            await session.rollback()
+            account = await session.scalar(select(Account).where(Account.identity_id == identity_id))
+            if account is None:
+                raise
+        return account
+
+    if account.email != email or account.handle != handle:
+        account.email = email
+        account.handle = handle
+        try:
+            await session.commit()
+        except IntegrityError:
+            # Another local row still holds that handle or e-mail; it catches up on its own next request.
+            await session.rollback()
+            log.warning("could not sync handle/e-mail for account %s yet", account.id)
+            account = await session.scalar(select(Account).where(Account.identity_id == identity_id))
     return account
-
-
-async def _check_login_rate(session: AsyncSession, key: str) -> None:
-    s = get_settings()
-    window_start = datetime.now(UTC) - timedelta(minutes=15)
-    count = await session.scalar(
-        select(func.count()).select_from(LoginAttempt).where(LoginAttempt.key == key, LoginAttempt.at >= window_start)
-    )
-    if count is not None and count >= s.login_attempts_per_15min:
-        raise RateLimited(
-            "Too many login attempts. Try again later.",
-            retry_after=900,
-            limit=s.login_attempts_per_15min,
-            remaining=0,
-            reset=900,
-        )
-
-
-async def login(session: AsyncSession, *, email: str, password: str, ip: str) -> tuple[Account, str]:
-    email = email.strip().lower()
-    ip_key = "ip:" + security.hash_ip(ip)
-    email_key = "email:" + email
-    await _check_login_rate(session, ip_key)
-    await _check_login_rate(session, email_key)
-    account = await session.scalar(select(Account).where(Account.email == email))
-    if account is None or not security.verify_password(account.password_hash, password):
-        session.add_all([LoginAttempt(key=ip_key), LoginAttempt(key=email_key)])
-        await session.commit()  # the request fails, but the attempt must be counted
-        raise Unauthorized("Wrong email or password.", hint="")
-    return account, security.issue_session_token(str(account.id))
 
 
 async def get_account(session: AsyncSession, account_id: uuid.UUID | str) -> Account:

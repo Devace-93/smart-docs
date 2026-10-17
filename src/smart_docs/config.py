@@ -28,12 +28,10 @@ class Settings(BaseSettings):
     # Database
     database_url: str = "postgresql+psycopg://sd:sd@localhost:5432/sd"
 
-    # Auth
-    secret_key: str = "change-me"
-    session_ttl_hours: int = 24
+    # Auth (SD-013): sessions come from accounts.3m4.net; this instance only verifies them.
+    accounts_url: str = "http://localhost:8085"  # public origin: JWT issuer, login/signup redirects, browser calls
+    accounts_internal_url: str | None = None  # where this process fetches the JWKS; defaults to accounts_url
     fernet_key: str | None = None
-    ip_hash_salt: str = "change-me-salt"
-    login_attempts_per_15min: int = 10
 
     # Model tiers
     default_tier: str = "local"
@@ -76,6 +74,11 @@ class Settings(BaseSettings):
             "llms.txt",
         ]
     )
+
+    @property
+    def accounts_jwks_url(self) -> str:
+        base = (self.accounts_internal_url or self.accounts_url).rstrip("/")
+        return f"{base}/.well-known/jwks.json"
 
     @property
     def sync_database_url(self) -> str:

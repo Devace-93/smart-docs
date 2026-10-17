@@ -8,7 +8,7 @@ from fastapi import APIRouter, Depends, Request, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from smart_docs.api import schemas
-from smart_docs.api.deps import Principal, client_ip, current_principal
+from smart_docs.api.deps import Principal, current_principal, current_principal_unverified
 from smart_docs.api.serializers import account_out, api_key_out, node_out, project_out
 from smart_docs.config import get_settings
 from smart_docs.db import get_session
@@ -53,30 +53,16 @@ async def health(session: AsyncSession = Depends(get_session)) -> dict:
     }
 
 
-# ---- auth -------------------------------------------------------------------
-
-
-@router.post("/auth/register", response_model=schemas.TokenOut, status_code=201, tags=["auth"])
-async def register(body: schemas.RegisterIn, session: AsyncSession = Depends(get_session)):
-    account = await accounts_svc.register(session, email=body.email, password=body.password, handle=body.handle)
-    from smart_docs.security import issue_session_token
-
-    await session.commit()
-    return {"token": issue_session_token(str(account.id)), "account": account_out(account)}
-
-
-@router.post("/auth/login", response_model=schemas.TokenOut, tags=["auth"])
-async def login(body: schemas.LoginIn, request: Request, session: AsyncSession = Depends(get_session)):
-    account, token = await accounts_svc.login(session, email=body.email, password=body.password, ip=client_ip(request))
-    return {"token": token, "account": account_out(account)}
-
-
 # ---- me ---------------------------------------------------------------------
+# Sign up and log in happen at accounts.3m4.net (SD-013); the session arrives
+# as the `3m4_session` cookie or a bearer JWT and the account is provisioned
+# from it on first sight.
 
 
 @router.get("/me", response_model=schemas.AccountOut, tags=["me"], responses=ERR)
-async def me(p: Principal = Depends(current_principal)):
-    return account_out(p.account)
+async def me(p: Principal = Depends(current_principal_unverified)):
+    """Who am I. Answers for an unverified e-mail too, so the editor can show the banner."""
+    return account_out(p.account, p.identity)
 
 
 @router.patch("/me", response_model=schemas.AccountOut, tags=["me"], responses=ERR)

@@ -10,11 +10,16 @@ def project_base_url(handle: str, slug: str) -> str:
     return f"{get_settings().public_base_url.rstrip('/')}/{handle}/{slug}"
 
 
-def account_out(a: Account) -> dict:
+def account_out(a: Account, identity: dict | None = None) -> dict:
+    """`identity` is the session's claims (None for API keys): name, avatar and the verified flag come from it."""
+    identity = identity or {}
     return {
         "id": a.id,
         "email": a.email,
+        "email_verified": bool(identity.get("email_verified", True)),
         "handle": a.handle,
+        "name": identity.get("name"),
+        "avatar_url": identity.get("avatar_url"),
         "tier": a.tier,
         "byok_base_url": a.byok_base_url,
         "byok_model": a.byok_model,

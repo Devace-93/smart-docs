@@ -35,11 +35,14 @@ services:
     environment:
       DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg://sd:sd@db:5432/sd}
       OLLAMA_URL: ${OLLAMA_URL:-http://ollama:11434}
+      # The accounts API container, reached over the shared `edge` network (SD-013).
+      ACCOUNTS_INTERNAL_URL: ${ACCOUNTS_INTERNAL_URL:-http://accounts-api-1:5000}
     ports:
       - "${SD_PORT:-8000}:8000"
     depends_on:
       db: { condition: service_healthy }
       migrate: { condition: service_completed_successfully }
+    networks: [default, edge]
     restart: unless-stopped
 
   worker:
@@ -78,6 +81,12 @@ services:
         ollama pull ${LOCAL_MODEL:-qwen2.5:3b}
         ollama pull ${EMBED_MODEL:-nomic-embed-text}
     restart: "no"
+
+# `edge` is shared with the accounts stack (and, in production, the 3m4 Caddy):
+#   docker network inspect edge >/dev/null 2>&1 || docker network create edge
+networks:
+  edge:
+    external: true
 
 volumes:
   pgdata:

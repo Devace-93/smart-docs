@@ -16,5 +16,6 @@ One record per decision, numbered SD-001 onward, never deleted. The live log is 
 | [SD-010](sd-010.md) | Evals |
 | [SD-011](sd-011.md) | Build night plan |
 | [SD-012](sd-012.md) | File storage |
+| [SD-013](sd-013.md) | Shared identity: sessions from accounts.3m4.net |
 
 Built on 2026-10-15 with the rule changed to "build first, revisit the decisions after": everything in SD-003 to SD-010 is implemented except BYOK key storage (built), Jev reranking (not built), file uploads (SD-012, not built) and sharing (EP-11, not built).

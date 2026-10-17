@@ -77,20 +77,38 @@ const ts = Date.now().toString(36);
 const handle = `demo${ts.slice(-5)}`;
 const email = `demo-${ts}@example.com`;
 const password = "Demo-Passw0rd!";
+// Identity lives at the accounts service (SD-013): sign up there through its API, confirm the
+// address through Mailpit, refresh so the session carries email_verified, then open the editor.
+const ACCOUNTS = process.env.ACCOUNTS_URL ?? "http://localhost:8085";
+const MAILPIT = process.env.MAILPIT_URL ?? "http://localhost:8025";
+async function mailedLink(kind: "verify" | "magic"): Promise<string> {
+  for (let i = 0; i < 40; i++) {
+    const list = await (await fetch(`${MAILPIT}/api/v1/search?query=${encodeURIComponent("to:" + email)}`)).json();
+    for (const m of list.messages ?? []) {
+      const full = await (await fetch(`${MAILPIT}/api/v1/message/${m.ID}`)).json();
+      const match = String(full.Text ?? "").match(new RegExp(`${ACCOUNTS.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}/${kind}\?token=[A-Za-z0-9_-]+`));
+      if (match) return match[0];
+    }
+    await new Promise((r) => setTimeout(r, 500));
+  }
+  throw new Error(`no ${kind} mail for ${email}`);
+}
 
 // 1. Landing
 await page.goto(`${BASE}/`);
 await page.waitForSelector("text=Pages for people");
 await shot(page, "Smart Docs: an open-source knowledge base for people and agents", 2400);
 
-// 2. Sign up
+// 2. Sign up at the accounts service (shared across the 3m4 apps), then come back to the editor
 await page.goto(`${BASE}/signup`);
-await page.waitForSelector("input[type=email]");
-await page.locator("input[type=email]").pressSequentially(email, { delay: 30 });
-await page.fill("input[type=password]", password);
-await page.locator("input[type=text]").pressSequentially(handle, { delay: 40 });
-await shot(page, "Sign up with an email, a password and a public handle", 1600);
-await page.locator("button[type=submit]").click();
+await page.waitForURL(/\/signup/);
+await shot(page, "Sign up once at accounts.3m4.net: it works in every 3m4 app", 1600);
+const signup = await ctx.request.post(`${ACCOUNTS}/api/auth/signup`, { data: { email, password, handle } });
+if (!signup.ok()) throw new Error(`signup ${signup.status()}: ${await signup.text()}`);
+const verifyToken = new URL(await mailedLink("verify")).searchParams.get("token");
+await ctx.request.post(`${ACCOUNTS}/api/auth/verify/consume`, { data: { token: verifyToken } });
+await ctx.request.post(`${ACCOUNTS}/api/session/refresh`, { data: {} });
+await page.goto(`${BASE}/app`);
 await page.waitForSelector("text=No projects yet");
 await shot(page, "The editor. Projects, API keys, usage and settings on the left", 1800);
 

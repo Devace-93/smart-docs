@@ -4,10 +4,10 @@
   var root = document.getElementById('app');
   var BASE = root.dataset.base || '';
   var TIERS = (root.dataset.tiers || '').split(',').filter(Boolean);
-  var TOKEN_KEY = 'sd.token';
-  var S = { newKey: null, token: null, me: null, projects: [], project: null, tree: [], node: null, dirty: false, collapsed: {}, view: 'editor', preview: false, search: null };
-
-  try { S.token = localStorage.getItem(TOKEN_KEY); } catch (e) {}
+  // The identity service (SD-013). The session is the `3m4_session` cookie it set; this
+  // page never sees a token. Session calls go to the accounts origin with credentials.
+  var ACCOUNTS = (document.querySelector('meta[name="accounts-url"]') || {}).content || 'https://accounts.3m4.net';
+  var S = { newKey: null, me: null, projects: [], project: null, tree: [], node: null, dirty: false, collapsed: {}, view: 'editor', preview: false, search: null };
 
   // ---- helpers ---------------------------------------------------------
   function h(tag, attrs, children) {
@@ -26,51 +26,37 @@
     document.body.appendChild(t);
     setTimeout(function () { t.remove(); }, bad ? 5000 : 2500);
   }
-  function setToken(t) { S.token = t; try { t ? localStorage.setItem(TOKEN_KEY, t) : localStorage.removeItem(TOKEN_KEY); } catch (e) {} document.cookie = 'sd_session=' + (t || '') + '; path=/; max-age=' + (t ? 86400 : 0) + '; SameSite=Lax'; }
-  async function api(method, path, body) {
-    var opts = { method: method, headers: {} };
-    if (S.token) opts.headers['Authorization'] = 'Bearer ' + S.token;
+  function accountsUrl(page) { return ACCOUNTS + '/' + page + '?return_to=' + encodeURIComponent(location.origin + '/app'); }
+  function toLogin() { location.assign(accountsUrl('login')); }
+  async function accountsPost(path) {
+    var r = await fetch(ACCOUNTS + '/api' + path, { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: '{}' });
+    return r.ok;
+  }
+  async function logout() { try { await accountsPost('/session/logout'); } catch (e) {} location.assign('/'); }
+  var refreshing = null;
+  function refreshSession() { if (!refreshing) refreshing = accountsPost('/session/refresh').catch(function () { return false; }).finally(function () { refreshing = null; }); return refreshing; }
+  async function api(method, path, body, retried) {
+    var opts = { method: method, headers: {}, credentials: 'same-origin' };
     if (body !== undefined) { opts.headers['Content-Type'] = 'application/json'; opts.body = JSON.stringify(body); }
     var r = await fetch('/api/v1' + path, opts);
     if (r.status === 204) return null;
     var data = null; try { data = await r.json(); } catch (e) {}
     if (!r.ok) {
-      if (r.status === 401 && S.token && path !== '/auth/login') { setToken(null); S.me = null; go('#/login'); }
+      var code = data && data.code;
+      if (r.status === 401 && code === 'session_expired' && !retried) {
+        // The access token ran out: ask accounts for a fresh one, then retry once.
+        if (await refreshSession()) return api(method, path, body, true);
+      }
+      if (r.status === 401 && code !== 'unauthorized') { toLogin(); }
       var msg = (data && data.message) || ('HTTP ' + r.status);
       if (data && data.hint) msg += ' ' + data.hint;
-      var err = new Error(msg); err.status = r.status; err.data = data; throw err;
+      var err = new Error(msg); err.status = r.status; err.code = code; err.data = data; throw err;
     }
     return data;
   }
   function go(hash) { if (location.hash === hash) render(); else location.hash = hash; }
   function fmtDate(s) { return s ? new Date(s).toLocaleString() : ''; }
   function confirmLeave() { return !S.dirty || confirm('You have unsaved changes. Leave anyway?'); }
-
-  // ---- auth views --------------------------------------------------------
-  function authView(mode) {
-    var email = h('input', { type: 'email', placeholder: 'you@example.com', autocomplete: 'email' });
-    var pass = h('input', { type: 'password', placeholder: 'password (8+ characters)', autocomplete: mode === 'signup' ? 'new-password' : 'current-password' });
-    var handle = h('input', { type: 'text', placeholder: 'handle, e.g. enrique (public URL: /handle/project/page)' });
-    var err = h('p', { class: 'error' });
-    var form = h('form', { onsubmit: async function (e) {
-      e.preventDefault(); err.textContent = '';
-      try {
-        var body = { email: email.value, password: pass.value };
-        if (mode === 'signup') body.handle = handle.value || null;
-        var out = await api('POST', mode === 'signup' ? '/auth/register' : '/auth/login', body);
-        setToken(out.token); S.me = out.account; go('#/projects');
-      } catch (ex) { err.textContent = ex.message; }
-    } }, [
-      h('h1', null, [mode === 'signup' ? 'Create an account' : 'Log in']),
-      h('label', null, ['Email']), email,
-      h('label', null, ['Password']), pass,
-      mode === 'signup' ? h('label', null, ['Handle']) : null, mode === 'signup' ? handle : null,
-      err,
-      h('p', null, [h('button', { class: 'primary', type: 'submit' }, [mode === 'signup' ? 'Create account' : 'Log in'])]),
-      h('p', { class: 'muted' }, [mode === 'signup' ? 'Already have an account? ' : 'New here? ', h('a', { href: mode === 'signup' ? '#/login' : '#/signup' }, [mode === 'signup' ? 'Log in' : 'Create one'])])
-    ]);
-    return h('div', { class: 'auth' }, [form]);
-  }
 
   // ---- shell -------------------------------------------------------------
   async function loadProjects() { S.projects = await api('GET', '/projects'); }
@@ -94,7 +80,8 @@
       h('a', { href: '#/keys' }, ['API keys']),
       h('a', { href: '#/usage' }, ['Usage']),
       h('a', { href: '#/settings' }, ['Settings']),
-      h('a', { href: '#', onclick: function (e) { e.preventDefault(); setToken(null); S.me = null; S.project = null; go('#/login'); } }, ['Log out'])
+      h('a', { href: ACCOUNTS + '/profile', target: '_blank', rel: 'noopener' }, ['Account ↗']),
+      h('a', { href: '#', onclick: function (e) { e.preventDefault(); if (!confirmLeave()) return; logout(); } }, ['Log out'])
     ]);
     return h('aside', { class: 'side' }, [h('div', { class: 'row' }, [sel, newProj]), tools, treeList(S.tree), views]);
   }
@@ -284,7 +271,7 @@
       TIERS.indexOf('byok') >= 0 ? h('div', { class: 'card' }, [h('h3', null, ['Bring your own key']), h('label', null, ['Base URL']), url, h('label', null, ['Model']), model, h('label', null, ['API key (stored encrypted)']), key]) : null,
       h('p', null, [h('button', { class: 'primary', type: 'submit' }, ['Save'])])
     ]);
-    return h('div', null, [h('h2', null, ['Settings']), h('p', { class: 'muted' }, ['Signed in as ', me.email, ' · handle ', h('code', null, [me.handle])]), form]);
+    return h('div', null, [h('h2', null, ['Settings']), h('p', { class: 'muted' }, ['Signed in as ', me.email, ' · handle ', h('code', null, [me.handle]), ' · e-mail, password, avatar and handle are managed at ', h('a', { href: ACCOUNTS + '/profile', target: '_blank', rel: 'noopener' }, ['your 3m4 account']), '. Renaming the handle there renames your public URLs here.']), form]);
   }
 
   // ---- router -------------------------------------------------------------------
@@ -292,13 +279,22 @@
     root.innerHTML = '';
     var hash = location.hash || '#/projects';
     var parts = hash.slice(2).split('/');
-    if (!S.token) { root.appendChild(authView(parts[0] === 'signup' ? 'signup' : 'login')); return; }
     try {
-      if (!S.me) S.me = await api('GET', '/me');
-      if (!S.projects.length) await loadProjects();
+      if (!S.me) S.me = await api('GET', '/me');  // 401 sends the browser to the accounts login page
     } catch (ex) { if (ex.status !== 401) toast(ex.message, true); return; }
-    var nav = document.getElementById('nav-user'); if (nav) nav.textContent = S.me.handle;
-    if (parts[0] === 'login' || parts[0] === 'signup') { go('#/projects'); return; }
+    var nav = document.getElementById('nav-user');
+    if (nav) { nav.innerHTML = ''; nav.appendChild(h('a', { class: 'nav-user', href: ACCOUNTS + '/profile', title: 'Your 3m4 account' }, [S.me.avatar_url ? h('img', { src: S.me.avatar_url, alt: '' }) : null, '@' + S.me.handle])); }
+    if (!S.me.email_verified) {
+      // Everything but /me answers 403 email_unverified until the address is confirmed.
+      root.appendChild(h('div', { class: 'auth' }, [
+        h('h1', null, ['Verify your e-mail']),
+        h('p', null, ['Open the link sent to ', h('strong', null, [S.me.email]), ' to start using the editor.']),
+        h('p', null, [h('a', { class: 'btn primary', href: ACCOUNTS + '/profile' }, ['Resend or change the address'])]),
+        h('p', { class: 'muted' }, [h('a', { href: '#', onclick: async function (e) { e.preventDefault(); await refreshSession(); S.me = null; render(); } }, ['I verified it, reload'])])
+      ]));
+      return;
+    }
+    try { if (!S.projects.length) await loadProjects(); } catch (ex) { toast(ex.message, true); return; }
     var pane = h('section', { class: 'pane' });
     if (parts[0] === 'p' && parts[1]) {
       var slug = decodeURIComponent(parts[1]);
@@ -317,7 +313,7 @@
   }
   window.addEventListener('hashchange', render);
   window.addEventListener('beforeunload', function (e) { if (S.dirty) { e.preventDefault(); e.returnValue = ''; } });
-  if (location.pathname === '/signup' && !location.hash) location.hash = '#/signup';
-  if (location.pathname === '/login' && !location.hash) location.hash = '#/login';
+  // A tab that comes back after a while re-checks the session (accounts may have logged it out).
+  document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible' && S.me && !S.dirty) { S.me = null; render(); } });
   render();
 })();

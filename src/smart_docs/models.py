@@ -34,9 +34,10 @@ class Account(Base):
     __tablename__ = "accounts"
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    # The user id at accounts.3m4.net (the JWT `sub`). E-mail and handle mirror its claims (SD-013).
+    identity_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), unique=True, nullable=False)
     email: Mapped[str] = mapped_column(String(320), unique=True, nullable=False)
     handle: Mapped[str] = mapped_column(String(64), unique=True, nullable=False)
-    password_hash: Mapped[str] = mapped_column(Text, nullable=False)
     tier: Mapped[str] = mapped_column(String(16), nullable=False, default="local")
     byok_base_url: Mapped[str | None] = mapped_column(Text)
     byok_model: Mapped[str | None] = mapped_column(Text)
@@ -143,12 +144,3 @@ class UsageEvent(Base):
     tier: Mapped[str] = mapped_column(String(16), nullable=False)
     at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now, nullable=False)
     meta: Mapped[dict] = mapped_column(JSONB, nullable=False, default=dict)
-
-
-class LoginAttempt(Base):
-    __tablename__ = "login_attempts"
-    __table_args__ = (Index("ix_login_attempts_key_at", "key", "at"),)
-
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    key: Mapped[str] = mapped_column(String(128), nullable=False)
-    at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now, nullable=False)
