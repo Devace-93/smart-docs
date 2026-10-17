@@ -20,6 +20,10 @@
   {# metrics web analytics: page views, visitors, referrers, devices (cookie-less) #}
   <script src="{{ metrics_tracker_url }}" data-key="{{ metrics_project_key }}" defer></script>
   {% endif %}
+  {% if oops_project_key %}
+  {# oops error tracking: uncaught errors, rejected promises, breadcrumbs #}
+  <script defer src="{{ oops_sdk_url }}" data-key="{{ oops_project_key }}" data-env="production"></script>
+  {% endif %}
 </head>
 <body class="{% block body_class %}{% endblock %}">
   <header class="top">

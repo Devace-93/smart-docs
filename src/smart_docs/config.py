@@ -24,6 +24,9 @@ class Settings(BaseSettings):
     # metrics web analytics (https://metrics.3m4.net): the project's PUBLIC key. Empty = no tracker.
     metrics_project_key: str = ""
     metrics_tracker_url: str = "https://metrics.3m4.net/m.js"
+    # oops error tracking (https://oops.3m4.net): the project's PUBLIC key. Empty = no SDK.
+    oops_project_key: str = ""
+    oops_sdk_url: str = "https://oops.3m4.net/o.js"
 
     # Database
     database_url: str = "postgresql+psycopg://sd:sd@localhost:5432/sd"
