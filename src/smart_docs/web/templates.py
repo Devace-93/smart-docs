@@ -29,6 +29,8 @@ def _globals() -> dict:
         "retro_widget_url": s.retro_widget_url,
         "metrics_project_key": s.metrics_project_key,
         "metrics_tracker_url": s.metrics_tracker_url,
+        "oops_project_key": s.oops_project_key,
+        "oops_sdk_url": s.oops_sdk_url,
         "year": lambda: datetime.now(UTC).year,
     }
 
