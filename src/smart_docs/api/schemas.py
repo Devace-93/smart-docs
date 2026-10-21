@@ -8,27 +8,13 @@ from datetime import datetime
 from pydantic import BaseModel, Field
 
 
-class RegisterIn(BaseModel):
-    email: str
-    password: str = Field(min_length=8, max_length=200)
-    handle: str | None = Field(default=None, description="URL handle for public pages: /{handle}/{project}/{path}")
-
-
-class LoginIn(BaseModel):
-    email: str
-    password: str
-
-
-class TokenOut(BaseModel):
-    token: str
-    token_type: str = "bearer"
-    account: AccountOut
-
-
 class AccountOut(BaseModel):
     id: uuid.UUID
     email: str
-    handle: str
+    email_verified: bool = True
+    handle: str = Field(description="Public URL handle, mirrored from accounts.3m4.net: /{handle}/{project}/{path}")
+    name: str | None = None
+    avatar_url: str | None = None
     tier: str
     byok_base_url: str | None = None
     byok_model: str | None = None

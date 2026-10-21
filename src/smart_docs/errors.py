@@ -46,6 +46,44 @@ class Unauthorized(SDError):
     hint = "Send a bearer token or an API key."
 
 
+class NoSession(Unauthorized):
+    """Nothing was presented: the browser goes to accounts.3m4.net to log in (SD-014)."""
+
+    code = "no_session"
+    hint = "Log in at the accounts service, or send an sd_ API key."
+
+    def __init__(self, message: str = "Not signed in.", *, hint: str | None = None):
+        super().__init__(message, hint=hint)
+
+
+class SessionExpired(Unauthorized):
+    """The session JWT is past its expiry: refresh it at the accounts service and retry once."""
+
+    code = "session_expired"
+    hint = "POST {accounts}/api/session/refresh with credentials, then retry."
+
+    def __init__(self, message: str = "Session expired.", *, hint: str | None = None):
+        super().__init__(message, hint=hint)
+
+
+class InvalidSession(Unauthorized):
+    code = "invalid_session"
+    hint = "Log in again."
+
+    def __init__(self, message: str = "Invalid session.", *, hint: str | None = None):
+        super().__init__(message, hint=hint)
+
+
+class EmailUnverified(Forbidden):
+    """Signed in, but the e-mail is not verified yet. `GET /me` still answers so the editor can say so."""
+
+    code = "email_unverified"
+    hint = "Verify your e-mail address from the accounts profile page, then reload."
+
+    def __init__(self, message: str = "Verify your e-mail address to continue.", *, hint: str | None = None):
+        super().__init__(message, hint=hint)
+
+
 class RateLimited(SDError):
     code = "rate_limited"
     status = 429

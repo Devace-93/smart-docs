@@ -3,7 +3,8 @@
 {% block body_class %}app-body{% endblock %}
 {% block main_class %}app-main{% endblock %}
 {% block nav_actions %}
-  <span class="nav-user"></span>
+  {# filled by app.js with the avatar and handle from the 3m4 session (SD-014) #}
+  <span id="nav-user"></span>
 {% endblock %}
 {% block content %}
 <div id="app" data-tiers="{{ tiers | join(',') }}" data-base="{{ public_base_url }}">

@@ -24,6 +24,7 @@ def _globals() -> dict:
         "source_url": "https://github.com/Devace-93/smart-docs",
         "info_url": s.info_url,
         "public_base_url": s.public_base_url.rstrip("/"),
+        "accounts_url": s.accounts_url.rstrip("/"),
         "signups_open": s.signups_open,
         "retro_project_key": s.retro_project_key,
         "retro_widget_url": s.retro_widget_url,

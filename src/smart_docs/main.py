@@ -43,7 +43,8 @@ def create_app() -> FastAPI:
         version="0.1.0",
         description=(
             "Smart Docs REST API. People and agents use the same endpoints. "
-            "Authenticate with `Authorization: Bearer <session token or sd_ API key>`. "
+            "Authenticate with `Authorization: Bearer sd_<API key>`, or with a 3m4 accounts session "
+            "(the `3m4_session` cookie from accounts.3m4.net, also accepted as a bearer JWT). "
             "Public pages live at `/{handle}/{project}/{path}` with `.md` and `llms.txt` variants."
         ),
         lifespan=lifespan,

@@ -1,49 +1,16 @@
-"""Password hashing, session tokens, API keys and secret encryption."""
+"""API keys and secret encryption. Sessions belong to accounts.3m4.net (see `m4session.py`, SD-014)."""
 
 from __future__ import annotations
 
 import hashlib
-import hmac
 import secrets
-from datetime import UTC, datetime, timedelta
 
-import jwt
-from argon2 import PasswordHasher
-from argon2.exceptions import VerifyMismatchError
 from cryptography.fernet import Fernet, InvalidToken
 
 from smart_docs.config import get_settings
 
-_hasher = PasswordHasher()
-
 API_KEY_PREFIX = "sd_"
 SCOPES = ("read", "write", "publish")
-
-
-def hash_password(password: str) -> str:
-    return _hasher.hash(password)
-
-
-def verify_password(password_hash: str, password: str) -> bool:
-    try:
-        return _hasher.verify(password_hash, password)
-    except VerifyMismatchError:
-        return False
-
-
-def issue_session_token(account_id: str) -> str:
-    s = get_settings()
-    now = datetime.now(UTC)
-    payload = {"sub": account_id, "iat": now, "exp": now + timedelta(hours=s.session_ttl_hours)}
-    return jwt.encode(payload, s.secret_key, algorithm="HS256")
-
-
-def read_session_token(token: str) -> str | None:
-    try:
-        payload = jwt.decode(token, get_settings().secret_key, algorithms=["HS256"])
-    except jwt.PyJWTError:
-        return None
-    return payload.get("sub")
 
 
 def new_api_key() -> tuple[str, str, str]:
@@ -54,12 +21,6 @@ def new_api_key() -> tuple[str, str, str]:
 
 def hash_api_key(plaintext: str) -> str:
     return hashlib.sha256(plaintext.encode()).hexdigest()
-
-
-def hash_ip(ip: str) -> str:
-    """Daily-salted hash. Raw IPs are never stored."""
-    day = datetime.now(UTC).strftime("%Y-%m-%d")
-    return hmac.new(get_settings().ip_hash_salt.encode(), f"{day}:{ip}".encode(), hashlib.sha256).hexdigest()[:32]
 
 
 def _fernet() -> Fernet | None:

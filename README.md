@@ -17,13 +17,15 @@ open http://localhost:8000
 
 `--profile local` adds Ollama and pulls `qwen2.5:3b` (summaries, tags) and `nomic-embed-text` (search). Without it, set `LOCAL_ENABLED=false` and new accounts use agent mode, where the agent supplies summary and tags. Hosted (DeepSeek) and bring-your-own-key tiers are env flags, see `.env.example`.
 
+People sign in through the shared 3m4 identity service (SD-014). Locally that is the `accounts` stack on `http://localhost:8085` (`cd ~/accounts && make up`, which also creates the `edge` docker network the `api` container joins). `ACCOUNTS_URL` points at it; the first visit creates the Smart Docs account from the session. API keys (`sd_...`) keep working as before.
+
 Four containers: `api` (FastAPI, the editor, public pages, `/mcp`), `worker` (summaries, tags, embeddings), `db` (Postgres 16 + pgvector), `ollama` (optional). No Redis, no cloud account, no telemetry.
 
 ## Use it
 
 | Door | Where |
 | --- | --- |
-| Editor | `/app` (projects, tree, Markdown editor with preview, publish, search, API keys, usage, tier) |
+| Editor | `/app` (projects, tree, Markdown editor with preview, publish, search, API keys, usage, tier). `/login` and `/signup` send you to the accounts service and back |
 | REST API | `/api/v1`, spec at `/openapi.json`, reference at `/docs` |
 | MCP over HTTP | `/mcp` with `Authorization: Bearer sd_...` |
 | MCP over stdio | `uv run sd-mcp` with `SD_API_KEY` and `DATABASE_URL` |
@@ -51,7 +53,7 @@ uv run pytest                   # tests hit the db container above, in their own
 uv run sd-evals --key sd_...    # search eval, writes evals/results/
 ```
 
-`sd` also has `create-user`, `reset-password` and `seed <folder> --handle h --project p --public` (imports a folder of Markdown files as pages).
+`sd` also has `seed <folder> --handle h --project p --public` (imports a folder of Markdown files as pages into an account that has signed in once). Accounts, passwords and handles are managed at the accounts service, not by `sd`.
 
 ## Repository layout
 

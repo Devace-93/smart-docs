@@ -1,10 +1,9 @@
-"""`sd` command line: migrations, users, worker, server and seeding."""
+"""`sd` command line: migrations, worker, server and seeding. Accounts are created by logging in (SD-014)."""
 
 from __future__ import annotations
 
 import argparse
 import asyncio
-import getpass
 import sys
 from pathlib import Path
 
@@ -33,42 +32,6 @@ async def _apply_queue_schema() -> None:
         if not exists["present"]:
             await app.schema_manager.apply_schema_async()
             print("procrastinate schema applied")
-
-
-def cmd_create_user(args) -> None:
-    from smart_docs.db import session_factory
-    from smart_docs.services.accounts import register
-
-    password = args.password or getpass.getpass("Password: ")
-
-    async def run():
-        async with session_factory()() as session:
-            account = await register(session, email=args.email, password=password, handle=args.handle)
-            await session.commit()
-            print(f"created {account.email} with handle {account.handle}")
-
-    asyncio.run(run())
-
-
-def cmd_reset_password(args) -> None:
-    from sqlalchemy import select
-
-    from smart_docs.db import session_factory
-    from smart_docs.models import Account
-    from smart_docs.security import hash_password
-
-    password = args.password or getpass.getpass("New password: ")
-
-    async def run():
-        async with session_factory()() as session:
-            account = await session.scalar(select(Account).where(Account.email == args.email.lower()))
-            if account is None:
-                sys.exit(f"no account {args.email}")
-            account.password_hash = hash_password(password)
-            await session.commit()
-            print("password updated")
-
-    asyncio.run(run())
 
 
 def cmd_worker(args) -> None:
@@ -184,17 +147,6 @@ def main() -> None:
     sub.add_parser("enrich-pending", help="queue enrichment for pages missing metadata or embeddings").set_defaults(
         fn=cmd_enrich_pending
     )
-
-    p = sub.add_parser("create-user", help="create an account")
-    p.add_argument("email")
-    p.add_argument("--handle")
-    p.add_argument("--password")
-    p.set_defaults(fn=cmd_create_user)
-
-    p = sub.add_parser("reset-password", help="set a new password for an account")
-    p.add_argument("email")
-    p.add_argument("--password")
-    p.set_defaults(fn=cmd_reset_password)
 
     p = sub.add_parser("worker", help="run the enrichment worker")
     p.add_argument("--concurrency", type=int, default=1)

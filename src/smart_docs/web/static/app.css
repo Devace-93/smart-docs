@@ -98,8 +98,12 @@ label { display: block; font-size: 0.9em; color: var(--fg2); margin: 10px 0 4px;
 /* editor */
 .app-body main { flex: 1; } .app-main { display: flex; flex-direction: column; }
 #app { flex: 1; display: flex; flex-direction: column; }
-.auth { max-width: 380px; margin: 60px auto; padding: 0 16px; } .auth h1 { font-size: 1.5rem; }
+.auth { max-width: 380px; margin: 60px auto; padding: 0 16px; text-align: center; } .auth h1 { font-size: 1.5rem; }
 .auth .error { color: var(--danger); margin: 8px 0; }
+.nav-user { display: inline-flex; align-items: center; gap: 6px; color: var(--fg); }
+.nav-user img { width: 22px; height: 22px; border-radius: 50%; object-fit: cover; background: var(--bg3); }
+.banner { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; padding: 10px 16px; background: var(--bg3); border-bottom: 1px solid var(--line); font-size: 0.93em; }
+.banner .mini { margin-left: auto; }
 .shell { display: grid; grid-template-columns: 280px 1fr; flex: 1; min-height: 0; }
 .side { border-right: 1px solid var(--line); background: var(--bg2); padding: 12px; overflow-y: auto; }
 .side .row { display: flex; gap: 6px; align-items: center; margin-bottom: 8px; }

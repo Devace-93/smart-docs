@@ -12,7 +12,7 @@ from typing import Any
 
 from mcp.server.mcpserver import MCPServer
 
-from smart_docs.api.deps import Principal, resolve_principal
+from smart_docs.api.deps import Principal, principal_from_api_key
 from smart_docs.api.routes import has_body
 from smart_docs.api.serializers import node_out, project_base_url, project_out
 from smart_docs.db import session_factory
@@ -342,6 +342,6 @@ async def principal_from_key(api_key: str | None) -> Principal | None:
     if not api_key:
         return None
     async with session_factory()() as session:
-        p = await resolve_principal(session, api_key)
+        p = await principal_from_api_key(session, api_key)
         await session.commit()
         return p
