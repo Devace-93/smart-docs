@@ -1,4 +1,4 @@
-"""Mint 3m4 accounts sessions for tests (SD-013).
+"""Mint 3m4 accounts sessions for tests (SD-014).
 
 One throwaway Ed25519 key per test process. `conftest.py` points the verifier
 at `JWKS`, so every token from `mint()` verifies without the accounts service.

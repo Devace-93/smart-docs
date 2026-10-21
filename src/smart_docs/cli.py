@@ -1,4 +1,4 @@
-"""`sd` command line: migrations, worker, server and seeding. Accounts are created by logging in (SD-013)."""
+"""`sd` command line: migrations, worker, server and seeding. Accounts are created by logging in (SD-014)."""
 
 from __future__ import annotations
 

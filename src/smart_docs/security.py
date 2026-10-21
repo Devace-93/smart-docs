@@ -1,4 +1,4 @@
-"""API keys and secret encryption. Sessions belong to accounts.3m4.net (see `m4session.py`, SD-013)."""
+"""API keys and secret encryption. Sessions belong to accounts.3m4.net (see `m4session.py`, SD-014)."""
 
 from __future__ import annotations
 

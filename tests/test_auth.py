@@ -1,4 +1,4 @@
-"""SD-013 shared identity (sessions from accounts.3m4.net) and SD-008 API keys with scopes."""
+"""SD-014 shared identity (sessions from accounts.3m4.net) and SD-008 API keys with scopes."""
 
 from __future__ import annotations
 

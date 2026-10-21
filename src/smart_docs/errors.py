@@ -47,7 +47,7 @@ class Unauthorized(SDError):
 
 
 class NoSession(Unauthorized):
-    """Nothing was presented: the browser goes to accounts.3m4.net to log in (SD-013)."""
+    """Nothing was presented: the browser goes to accounts.3m4.net to log in (SD-014)."""
 
     code = "no_session"
     hint = "Log in at the accounts service, or send an sd_ API key."

@@ -1,6 +1,6 @@
 """Verify 3m4 accounts sessions (the `3m4_session` cookie or a bearer JWT).
 
-Vendored from `accounts/packages/relying-party/python/m4session.py` (SD-013).
+Vendored from `accounts/packages/relying-party/python/m4session.py` (SD-014).
 Two deliberate differences from the upstream file: the JWKS is fetched with
 httpx instead of requests (already a dependency here), and the fetch is a
 module-level function, `fetch_jwks`, so tests can replace it with a stub and

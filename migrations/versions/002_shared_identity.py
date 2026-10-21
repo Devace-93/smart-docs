@@ -1,4 +1,4 @@
-"""Shared identity (SD-013): accounts mirror accounts.3m4.net.
+"""Shared identity (SD-014): accounts mirror accounts.3m4.net.
 
 Destructive by decision: every account and everything hanging from it
 (projects, nodes, pages, API keys, usage events) is deleted. There were no

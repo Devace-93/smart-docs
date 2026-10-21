@@ -1,4 +1,4 @@
-"""Accounts and API keys. Identity (password, e-mail, handle, avatar) lives at accounts.3m4.net (SD-013)."""
+"""Accounts and API keys. Identity (password, e-mail, handle, avatar) lives at accounts.3m4.net (SD-014)."""
 
 from __future__ import annotations
 

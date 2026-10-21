@@ -34,7 +34,7 @@ class Account(Base):
     __tablename__ = "accounts"
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    # The user id at accounts.3m4.net (the JWT `sub`). E-mail and handle mirror its claims (SD-013).
+    # The user id at accounts.3m4.net (the JWT `sub`). E-mail and handle mirror its claims (SD-014).
     identity_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), unique=True, nullable=False)
     email: Mapped[str] = mapped_column(String(320), unique=True, nullable=False)
     handle: Mapped[str] = mapped_column(String(64), unique=True, nullable=False)

@@ -77,7 +77,7 @@ const ts = Date.now().toString(36);
 const handle = `demo${ts.slice(-5)}`;
 const email = `demo-${ts}@example.com`;
 const password = "Demo-Passw0rd!";
-// Identity lives at the accounts service (SD-013): sign up there through its API, confirm the
+// Identity lives at the accounts service (SD-014): sign up there through its API, confirm the
 // address through Mailpit, refresh so the session carries email_verified, then open the editor.
 const ACCOUNTS = process.env.ACCOUNTS_URL ?? "http://localhost:8085";
 const MAILPIT = process.env.MAILPIT_URL ?? "http://localhost:8025";

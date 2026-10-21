@@ -35,7 +35,7 @@ services:
     environment:
       DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg://sd:sd@db:5432/sd}
       OLLAMA_URL: ${OLLAMA_URL:-http://ollama:11434}
-      # The accounts API container, reached over the shared `edge` network (SD-013).
+      # The accounts API container, reached over the shared `edge` network (SD-014).
       ACCOUNTS_INTERNAL_URL: ${ACCOUNTS_INTERNAL_URL:-http://accounts-api-1:5000}
     ports:
       - "${SD_PORT:-8000}:8000"

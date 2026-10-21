@@ -54,7 +54,7 @@ async def health(session: AsyncSession = Depends(get_session)) -> dict:
 
 
 # ---- me ---------------------------------------------------------------------
-# Sign up and log in happen at accounts.3m4.net (SD-013); the session arrives
+# Sign up and log in happen at accounts.3m4.net (SD-014); the session arrives
 # as the `3m4_session` cookie or a bearer JWT and the account is provisioned
 # from it on first sight.
 

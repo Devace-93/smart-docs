@@ -1,6 +1,6 @@
 """Request-scoped dependencies: the database session and the authenticated principal.
 
-Two credentials open the API (SD-013):
+Two credentials open the API (SD-014):
 
 - A 3m4 accounts session: the `3m4_session` cookie set by accounts.3m4.net, or
   the same JWT as `Authorization: Bearer <jwt>`. It is verified locally against

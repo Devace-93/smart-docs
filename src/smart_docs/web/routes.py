@@ -1,6 +1,6 @@
 """The editor shell and the landing page. All data comes from the REST API over fetch.
 
-Login and signup live at accounts.3m4.net (SD-013): `/login` and `/signup`
+Login and signup live at accounts.3m4.net (SD-014): `/login` and `/signup`
 only redirect there and ask to come back to the editor.
 """
 

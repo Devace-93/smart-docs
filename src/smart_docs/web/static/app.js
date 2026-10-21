@@ -4,7 +4,7 @@
   var root = document.getElementById('app');
   var BASE = root.dataset.base || '';
   var TIERS = (root.dataset.tiers || '').split(',').filter(Boolean);
-  // The identity service (SD-013). The session is the `3m4_session` cookie it set; this
+  // The identity service (SD-014). The session is the `3m4_session` cookie it set; this
   // page never sees a token. Session calls go to the accounts origin with credentials.
   var ACCOUNTS = (document.querySelector('meta[name="accounts-url"]') || {}).content || 'https://accounts.3m4.net';
   var S = { newKey: null, me: null, projects: [], project: null, tree: [], node: null, dirty: false, collapsed: {}, view: 'editor', preview: false, search: null };
@@ -32,7 +32,9 @@
     var r = await fetch(ACCOUNTS + '/api' + path, { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: '{}' });
     return r.ok;
   }
-  async function logout() { try { await accountsPost('/session/logout'); } catch (e) {} location.assign('/'); }
+  // html.authed drives the shared header (Open the editor vs Log in, see app.css).
+  function setAuthed(on) { document.documentElement.classList.toggle('authed', !!on); }
+  async function logout() { try { await accountsPost('/session/logout'); } catch (e) {} setAuthed(false); location.assign('/'); }
   var refreshing = null;
   function refreshSession() { if (!refreshing) refreshing = accountsPost('/session/refresh').catch(function () { return false; }).finally(function () { refreshing = null; }); return refreshing; }
   async function api(method, path, body, retried) {
@@ -282,6 +284,7 @@
     try {
       if (!S.me) S.me = await api('GET', '/me');  // 401 sends the browser to the accounts login page
     } catch (ex) { if (ex.status !== 401) toast(ex.message, true); return; }
+    setAuthed(true);
     var nav = document.getElementById('nav-user');
     if (nav) { nav.innerHTML = ''; nav.appendChild(h('a', { class: 'nav-user', href: ACCOUNTS + '/profile', title: 'Your 3m4 account' }, [S.me.avatar_url ? h('img', { src: S.me.avatar_url, alt: '' }) : null, '@' + S.me.handle])); }
     if (!S.me.email_verified) {

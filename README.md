@@ -17,7 +17,7 @@ open http://localhost:8000
 
 `--profile local` adds Ollama and pulls `qwen2.5:3b` (summaries, tags) and `nomic-embed-text` (search). Without it, set `LOCAL_ENABLED=false` and new accounts use agent mode, where the agent supplies summary and tags. Hosted (DeepSeek) and bring-your-own-key tiers are env flags, see `.env.example`.
 
-People sign in through the shared 3m4 identity service (SD-013). Locally that is the `accounts` stack on `http://localhost:8085` (`cd ~/accounts && make up`, which also creates the `edge` docker network the `api` container joins). `ACCOUNTS_URL` points at it; the first visit creates the Smart Docs account from the session. API keys (`sd_...`) keep working as before.
+People sign in through the shared 3m4 identity service (SD-014). Locally that is the `accounts` stack on `http://localhost:8085` (`cd ~/accounts && make up`, which also creates the `edge` docker network the `api` container joins). `ACCOUNTS_URL` points at it; the first visit creates the Smart Docs account from the session. API keys (`sd_...`) keep working as before.
 
 Four containers: `api` (FastAPI, the editor, public pages, `/mcp`), `worker` (summaries, tags, embeddings), `db` (Postgres 16 + pgvector), `ollama` (optional). No Redis, no cloud account, no telemetry.
 
@@ -49,7 +49,7 @@ sed -i 's#@db:5432#@localhost:5433#; s#http://ollama:#http://localhost:#' .env
 uv run sd migrate
 uv run sd serve --reload        # http://localhost:8000
 uv run sd worker                # in a second terminal
-uv run pytest                   # tests hit the real Postgres
+uv run pytest                   # tests hit the db container above, in their own sd_test database
 uv run sd-evals --key sd_...    # search eval, writes evals/results/
 ```
 
