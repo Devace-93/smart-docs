@@ -32,7 +32,7 @@
      label (and the portal language) from the shared `3m4.lang` key, falling back to the browser language. #}
   <script src="{{ payments_url }}/pay.js" data-app="smartdocs" data-kind="donate" data-currency="usd" data-amount="500" data-label="Buy me a coffee ☕" data-mount="#support-top" defer></script>
   <script src="{{ payments_url }}/pay.js" data-app="smartdocs" data-kind="donate" data-currency="usd" data-amount="500" data-label="Buy me a coffee ☕" data-mount="#support-footer" defer></script>
-  <script>
+  <script id="support-lang">
     (function () {
       var l = "";
       try { l = localStorage.getItem("3m4.lang") || ""; } catch (e) { /* storage unavailable */ }
