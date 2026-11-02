@@ -28,9 +28,19 @@
   {% endif %}
   {# pay.js donate button (payments.3m4.net, CONTRACT.md section 10): one tag per mount (header + footer), every tag
      shares window.m4pay. The portal gates donations per viewer and only mounts the button when the switch is on;
-     the mounts stay hidden while empty (app.css). Smart Docs has no string catalog, so the label is plain English. #}
+     the mounts stay hidden while empty (app.css). Smart Docs has no string catalog: the inline hook below picks the
+     label (and the portal language) from the shared `3m4.lang` key, falling back to the browser language. #}
   <script src="{{ payments_url }}/pay.js" data-app="smartdocs" data-kind="donate" data-currency="usd" data-amount="500" data-label="Buy me a coffee ☕" data-mount="#support-top" defer></script>
   <script src="{{ payments_url }}/pay.js" data-app="smartdocs" data-kind="donate" data-currency="usd" data-amount="500" data-label="Buy me a coffee ☕" data-mount="#support-footer" defer></script>
+  <script>
+    (function () {
+      var l = "";
+      try { l = localStorage.getItem("3m4.lang") || ""; } catch (e) { /* storage unavailable */ }
+      l = l || navigator.language || "en";
+      var label = l.slice(0, 2) === "es" ? "Invítame un café ☕" : "Buy me a coffee ☕";
+      document.querySelectorAll('script[data-app="smartdocs"]').forEach(function (s) { s.dataset.label = label; s.dataset.lang = l; });
+    })();
+  </script>
 </head>
 <body class="{% block body_class %}{% endblock %}">
   <header class="top">
