@@ -26,6 +26,11 @@
   {# oops error tracking: uncaught errors, rejected promises, breadcrumbs #}
   <script defer src="{{ oops_sdk_url }}" data-key="{{ oops_project_key }}" data-env="production"></script>
   {% endif %}
+  {# pay.js donate button (payments.3m4.net, CONTRACT.md section 10): one tag per mount (header + footer), every tag
+     shares window.m4pay. The portal gates donations per viewer and only mounts the button when the switch is on;
+     the mounts stay hidden while empty (app.css). Smart Docs has no string catalog, so the label is plain English. #}
+  <script src="{{ payments_url }}/pay.js" data-app="smartdocs" data-kind="donate" data-currency="usd" data-amount="500" data-label="Buy me a coffee ☕" data-mount="#support-top" defer></script>
+  <script src="{{ payments_url }}/pay.js" data-app="smartdocs" data-kind="donate" data-currency="usd" data-amount="500" data-label="Buy me a coffee ☕" data-mount="#support-footer" defer></script>
 </head>
 <body class="{% block body_class %}{% endblock %}">
   <header class="top">
@@ -42,6 +47,7 @@
         {% endblock %}
       </div>
       <div class="actions">
+        <span id="support-top" class="support-mount hide-mobile"></span>
         <button class="btn ghost theme-toggle" type="button" aria-label="Toggle theme" title="Toggle theme" data-theme-toggle>
           <span class="moon" aria-hidden="true">🌙</span><span class="sun" aria-hidden="true">☀️</span>
         </button>
@@ -85,6 +91,7 @@
       <div class="footer-links">
         <a href="/docs">API</a>
         {% if footer_text %}<a href="{{ footer_url }}">{{ footer_text }}</a>{% endif %}
+        <span id="support-footer" class="support-mount"></span>
         <span class="footer-meta">Open source · MIT · © {{ year() }}</span>
       </div>
     </div>
