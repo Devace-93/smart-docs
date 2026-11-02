@@ -32,13 +32,20 @@
      label (and the portal language) from the shared `3m4.lang` key, falling back to the browser language. #}
   <script src="{{ payments_url }}/pay.js" data-app="smartdocs" data-kind="donate" data-currency="usd" data-amount="500" data-label="Buy me a coffee ☕" data-mount="#support-top" defer></script>
   <script src="{{ payments_url }}/pay.js" data-app="smartdocs" data-kind="donate" data-currency="usd" data-amount="500" data-label="Buy me a coffee ☕" data-mount="#support-footer" defer></script>
+  {# pay.js supporters list (footer): the opted-in donors of smartdocs plus every public GitHub sponsor, as a row of
+     chips under a title. Public (not gated); it renders nothing while the list is empty, so the mount stays hidden. #}
+  <script src="{{ payments_url }}/pay.js" data-app="smartdocs" data-kind="supporters" data-limit="24" data-label="Thanks to our supporters" data-mount="#supporters" defer></script>
   <script id="support-lang">
     (function () {
       var l = "";
       try { l = localStorage.getItem("3m4.lang") || ""; } catch (e) { /* storage unavailable */ }
       l = l || navigator.language || "en";
-      var label = l.slice(0, 2) === "es" ? "Invítame un café ☕" : "Buy me a coffee ☕";
-      document.querySelectorAll('script[data-app="smartdocs"]').forEach(function (s) { s.dataset.label = label; s.dataset.lang = l; });
+      var es = l.slice(0, 2) === "es";
+      var labels = { donate: es ? "Invítame un café ☕" : "Buy me a coffee ☕", supporters: es ? "Gracias a quienes nos apoyan" : "Thanks to our supporters" };
+      document.querySelectorAll('script[data-app="smartdocs"]').forEach(function (s) {
+        if (labels[s.dataset.kind]) s.dataset.label = labels[s.dataset.kind];
+        s.dataset.lang = l;
+      });
     })();
   </script>
 </head>
@@ -87,6 +94,8 @@
     {% block content %}{% endblock %}
   </main>
   <footer class="site-footer">
+    {# pay.js supporters list mount: its own row above the credit/links; hidden while empty (app.css). #}
+    <div id="supporters" class="supporters-mount"></div>
     <div class="footer-inner">
       <div class="footer-credit">
         <a href="https://www.linkedin.com/in/enrique-magallon/" target="_blank" rel="noopener noreferrer">Made by Enrique Magallón</a>
