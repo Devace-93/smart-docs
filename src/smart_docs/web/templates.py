@@ -32,6 +32,7 @@ def _globals() -> dict:
         "metrics_tracker_url": s.metrics_tracker_url,
         "oops_project_key": s.oops_project_key,
         "oops_sdk_url": s.oops_sdk_url,
+        "payments_url": s.payments_url.rstrip("/"),
         "year": lambda: datetime.now(UTC).year,
     }
 

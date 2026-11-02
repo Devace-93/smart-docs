@@ -27,6 +27,8 @@ class Settings(BaseSettings):
     # oops error tracking (https://oops.3m4.net): the project's PUBLIC key. Empty = no SDK.
     oops_project_key: str = ""
     oops_sdk_url: str = "https://oops.3m4.net/o.js"
+    # payments portal (https://payments.3m4.net): serves the pay.js donate button in the header and footer.
+    payments_url: str = "https://payments.3m4.net"
 
     # Database
     database_url: str = "postgresql+psycopg://sd:sd@localhost:5432/sd"
