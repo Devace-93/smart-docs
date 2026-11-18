@@ -5,21 +5,27 @@ Private and missing pages both return 404 so their existence is never leaked.
 
 from __future__ import annotations
 
+from xml.sax.saxutils import escape
+
 from fastapi import APIRouter, Depends, Request, Response
 from fastapi.responses import HTMLResponse, PlainTextResponse
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from smart_docs.api.serializers import project_base_url
 from smart_docs.config import get_settings
 from smart_docs.db import get_session
 from smart_docs.errors import NotFound
-from smart_docs.models import Node, Project
+from smart_docs.models import Account, Node, Project
 from smart_docs.services import projects as projects_svc
 from smart_docs.services import tree as tree_svc
 from smart_docs.services.render import llms_full_txt, llms_txt, markdown_with_front_matter
 from smart_docs.web.templates import templates
 
 router = APIRouter(tags=["public"])
+
+# A sitemap file holds at most 50,000 URLs; stay well under it.
+SITEMAP_MAX_PAGES = 20000
 
 
 def _cache_headers(etag: str) -> dict[str, str]:
@@ -148,6 +154,39 @@ async def page_html(handle: str, slug: str, path: str, request: Request, session
             "canonical": f"{project_base_url(handle, slug)}/{node.path}",
         },
         headers=_cache_headers(f"{node.id}-{node.version}"),
+    )
+
+
+@router.get("/sitemap.xml", include_in_schema=False)
+async def sitemap(session: AsyncSession = Depends(get_session)) -> Response:
+    """The landing page, every public page and the project each one belongs to."""
+    base = get_settings().public_base_url.rstrip("/")
+    rows = await session.execute(
+        select(Account.handle, Project.slug, Node.path)
+        .join(Project, Project.account_id == Account.id)
+        .join(Node, Node.project_id == Project.id)
+        .where(
+            Project.deleted_at.is_(None),
+            Node.kind == "page",
+            Node.is_public.is_(True),
+            Node.deleted_at.is_(None),
+        )
+        .order_by(Account.handle, Project.slug, Node.path)
+        .limit(SITEMAP_MAX_PAGES)
+    )
+    urls = [f"{base}/"]
+    projects: set[tuple[str, str]] = set()
+    for handle, slug, path in rows:
+        if (handle, slug) not in projects:
+            projects.add((handle, slug))
+            urls.append(project_base_url(handle, slug))
+        urls.append(f"{project_base_url(handle, slug)}/{path}")
+    body = "".join(f"  <url><loc>{escape(u)}</loc></url>\n" for u in urls)
+    return Response(
+        '<?xml version="1.0" encoding="UTF-8"?>\n'
+        f'<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n{body}</urlset>\n',
+        media_type="application/xml",
+        headers={"Cache-Control": f"public, max-age={get_settings().public_cache_seconds}"},
     )
 
 

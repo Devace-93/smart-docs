@@ -25,5 +25,22 @@ async def test_public_forms(client, user, project):
     assert node["version"] == 1
 
 
+async def test_sitemap_lists_only_public_pages(client, user, project):
+    slug, handle = project["slug"], user["handle"]
+    for title in ("Shown", "Hidden"):
+        r = await client.post(f"/api/v1/projects/{slug}/nodes", json={"title": title, "markdown": f"# {title}"})
+        assert r.status_code == 201, r.text
+    assert (await client.post(f"/api/v1/projects/{slug}/nodes/shown/publish", json={"public": True})).status_code == 200
+    anon = {"Authorization": ""}
+    res = await client.get("/sitemap.xml", headers=anon)
+    assert res.status_code == 200 and "xml" in res.headers["content-type"]
+    assert "<loc>http://testserver/</loc>" in res.text
+    assert f"<loc>http://testserver/{handle}/{slug}</loc>" in res.text
+    assert f"<loc>http://testserver/{handle}/{slug}/shown</loc>" in res.text
+    assert "hidden" not in res.text
+    robots = await client.get("/robots.txt", headers=anon)
+    assert "Sitemap: http://testserver/sitemap.xml" in robots.text
+
+
 async def test_reserved_handle_is_404(client):
     assert (await client.get("/api/x/llms.txt")).status_code == 404

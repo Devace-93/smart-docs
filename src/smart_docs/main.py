@@ -71,7 +71,10 @@ def create_app() -> FastAPI:
 
     @app.get("/robots.txt", include_in_schema=False)
     async def robots():
-        return PlainTextResponse("User-agent: *\nAllow: /\nDisallow: /app\nDisallow: /api/\n")
+        return PlainTextResponse(
+            "User-agent: *\nAllow: /\nDisallow: /app\nDisallow: /api/\n\n"
+            f"Sitemap: {s.public_base_url.rstrip('/')}/sitemap.xml\n"
+        )
 
     @app.get("/llms.txt", include_in_schema=False)
     async def instance_llms():
